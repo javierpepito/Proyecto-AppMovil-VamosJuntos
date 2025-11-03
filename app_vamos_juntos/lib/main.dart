@@ -197,6 +197,15 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
                 
+                const Text('Ingresa tus datos para crearte una cuenta:',
+                  
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Color.fromARGB(255, 0, 0, 0),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
                 // Campo Carrera
                 TextField(
                   decoration: InputDecoration(
