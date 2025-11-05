@@ -1,0 +1,137 @@
+import 'package:flutter/material.dart';
+import '../../services/auth_service.dart';
+import 'login_screen.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final _authService = AuthService();
+  String _userName = 'Usuario';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final user = await _authService.getUserProfile();
+      setState(() {
+        _userName = user.carrera;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _signOut() async {
+    await _authService.signOut();
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(icon: const Icon(Icons.notifications_outlined, color: Colors.black), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.logout, color: Colors.black), onPressed: _signOut),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(child: Image.asset('assets/images/logo.png', width: 150, height: 150, fit: BoxFit.contain)),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: Column(
+                      children: [
+                        Text('Bienvenido $_userName', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87)),
+                        const SizedBox(height: 5),
+                        const Text('Coordina salidas seguras con tus compañeros', style: TextStyle(fontSize: 14, color: Colors.black54)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  const Text('Salida grupal actual', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87)),
+                  const SizedBox(height: 15),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(color: const Color(0xFF0D47A1), borderRadius: BorderRadius.circular(15)),
+                    child: const Text('En este momento no estás dentro de ninguna salida grupal', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+                  ),
+                  const SizedBox(height: 30),
+                  const Text('Información importante', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87)),
+                  const SizedBox(height: 15),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(15)),
+                    child: Column(
+                      children: [
+                        const Text('Para poder unirte a una salida grupal debes entrar a un chat', style: TextStyle(color: Colors.white, fontSize: 15), textAlign: TextAlign.center),
+                        const SizedBox(height: 15),
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF4081),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          ),
+                          child: const Text('Ir a Chats', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(color: const Color(0xFFFF4081), borderRadius: BorderRadius.circular(15)),
+                    child: const Text('Consejo de seguridad: Antes de salir tu celular vigila tus rutas', style: TextStyle(color: Colors.white, fontSize: 15), textAlign: TextAlign.center),
+                  ),
+                  const SizedBox(height: 20),
+                  const Center(child: Text('Versión - 1.0', style: TextStyle(color: Color(0xFF00BCD4), fontSize: 14, fontWeight: FontWeight.w500))),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: const Color(0xFF0D47A1),
+        unselectedItemColor: Colors.grey,
+        currentIndex: 0,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.location_on_outlined), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.info_outline), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: ''),
+        ],
+      ),
+    );
+  }
+}
