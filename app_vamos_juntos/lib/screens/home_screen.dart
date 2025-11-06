@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final user = await _authService.getUserProfile();
       setState(() {
-        _userName = user.carrera;
+        _userName = user.nombreCompleto;  // Usa el getter nombreCompleto
         _isLoading = false;
       });
     } catch (e) {

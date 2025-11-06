@@ -39,8 +39,10 @@ class AuthService {
     }
   }
 
-  // Registrar usuario
+  // Registrar usuario - ACTUALIZADO CON NOMBRE Y APELLIDO
   Future<UserModel> signUp({
+    required String nombre,
+    required String apellido,
     required String email,
     required String password,
     required String carrera,
@@ -62,6 +64,8 @@ class AuthService {
 
       final profileData = {
         'id': response.user!.id,
+        'nombre': nombre.trim(),
+        'apellido': apellido.trim(),
         'carrera': carrera.trim(),
         'telefono_personal': telefono.trim(),
         'email': email.trim(),

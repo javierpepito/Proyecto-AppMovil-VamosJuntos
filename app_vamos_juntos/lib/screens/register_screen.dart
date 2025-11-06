@@ -10,6 +10,8 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _nombreController = TextEditingController();
+  final _apellidoController = TextEditingController();
   final _carreraController = TextEditingController();
   final _telefonoController = TextEditingController();
   final _emailController = TextEditingController();
@@ -20,6 +22,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _nombreController.dispose();
+    _apellidoController.dispose();
     _carreraController.dispose();
     _telefonoController.dispose();
     _emailController.dispose();
@@ -40,6 +44,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       await _authService.signUp(
+        nombre: _nombreController.text,
+        apellido: _apellidoController.text,
         email: _emailController.text,
         password: _passwordController.text,
         carrera: _carreraController.text,
@@ -92,6 +98,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const Text('VAMOJUNTOS', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1), letterSpacing: 1.2)),
                 const SizedBox(height: 40),
                 const Text('Ingresa tus datos para crearte una cuenta:', style: TextStyle(fontSize: 18, color: Colors.black)),
+                const SizedBox(height: 20),
+                
+                // Campo Nombre
+                TextField(
+                  controller: _nombreController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    labelText: 'Nombre',
+                  ),
+                ),
+                const SizedBox(height: 20),
+                
+                // Campo Apellido
+                TextField(
+                  controller: _apellidoController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    labelText: 'Apellido',
+                  ),
+                ),
                 const SizedBox(height: 20),
                 
                 TextField(controller: _carreraController, decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), labelText: 'Carrera')),
