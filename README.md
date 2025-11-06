@@ -21,7 +21,7 @@
 * Modelo de datos para: 
     - usuarios (id, nombre, apellido, carrera, telefono_personal, email)
 
-    - salidas (id, usuario_fk, chat_fk, punto_encuentro, hora_salida, /micros/)
+    - salidas (id, chat_fk, punto_encuentro, hora_salida, /micros/)
 
     - salida_participantes (id, salida_fk, usuario_fk, /estado/)
 
