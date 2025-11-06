@@ -1,43 +1,49 @@
 # app_vamos_juntos
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Fecha de proximos avances sabado 8 de noviembre (Interfaces sin funcionalidades listas)
 
 ## Mockups
-    Inicio de Sesion
-    Crear Cuenta
-    Pagina de Inicio
-    Chats Globales
-    Chat grupal por hora
-    Salidas Grupales
-    Seleccion de Paradero y Micro
-    Salida Grupal (Lista de Personas)
-    Informacion de los paraderos
-    Informacion de los puntos de encuentro
-    Perfil
-
-
-
+1. Inicio de Sesion 👍🏻
+2. Crear Cuenta 👍🏻
+3. Pagina de Inicio 👍🏻
+4. Chats Globales
+5. Chat grupal por hora
+6. Salidas Grupales
+7. Seleccion de Paradero y Micro
+8. Salida Grupal (Lista de Personas)
+9. Informacion de los paraderos
+10. Informacion de los puntos de encuentro
+11. Perfil
 
 
 ## Parte del Primo
+* Agregar campo nombre y apellido al usuario.
+* Mockups a realizar: 1, 2, 3 y 4
 
 ## Parte del Chetar
+* Mokcups a realizar: 5, 6, 7, 8
 
 ## Parte del Cristian
+* Mockups a realizar: 9, 10, 11
 
 ## Cosas que deben saber sobre Flutter
 
 ## Comandos
+```bash
+cd app_vamos_juntos
+```
+
+```bash
+flutter run
+```
+
+```bash
+flutter doctor
+```
+
+```bash
+flutter devices
+```
+
+## Cosas a mejorar y a agregar
+- Crear chats para cada salida.
