@@ -16,16 +16,18 @@
 11. Perfil
 
 ## Models
-* usuarios (id, nombre, apellido, carrera, telefono_personal, email)
-
 
 ## Parte del Primo
-* Crear modelo de datos para: 
-    - salidas (id, usuario_fk, punto_encuentro, usuarios_unidos, hora_salida, micros)
+* Modelo de datos para: 
+    - usuarios (id, nombre, apellido, carrera, telefono_personal, email)
+
+    - salidas (id, usuario_fk, chat_fk, punto_encuentro, hora_salida, /micros/)
+
+    - salida_participantes (id, salida_fk, usuario_fk, /estado/)
 
     - chat_participantes (id, chat_fk, usuario_fk)
 
-    - chats (id, destino o paradero, hora_inicio, hora_salida, usuarios_conectados o en linea, salidas grupales)
+    - chats (id, destino o paradero, hora_inicio, hora_salida, salidas grupales)
 
     - mensajes (id, chat_fk, usuario_fk, contenido, hora_enviado)
 
