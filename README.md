@@ -15,9 +15,20 @@
 10. Informacion de los puntos de encuentro
 11. Perfil
 
+## Models
+* usuarios (id, nombre, apellido, carrera, telefono_personal, email)
+
 
 ## Parte del Primo
-* Agregar campo nombre y apellido al usuario.
+* Crear modelo de datos para: 
+    - salidas (id, usuario_fk, punto_encuentro, usuarios_unidos, hora_salida, micros)
+
+    - chat_participantes (id, chat_fk, usuario_fk)
+
+    - chats (id, destino o paradero, hora_inicio, hora_salida, usuarios_conectados o en linea, salidas grupales)
+
+    - mensajes (id, chat_fk, usuario_fk, contenido, hora_enviado)
+
 * Mockups a realizar: 1, 2, 3 y 4
 
 ## Parte del Chetar
@@ -47,3 +58,4 @@ flutter devices
 
 ## Cosas a mejorar y a agregar
 - Crear chats para cada salida.
+- Agregar funcionalidad de foto de perfil en los datos.
