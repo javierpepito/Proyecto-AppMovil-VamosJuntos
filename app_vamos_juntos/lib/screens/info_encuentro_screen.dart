@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/barra_navegacion.dart';
 
 class InfoPuntoEncuentroPage extends StatelessWidget {
   const InfoPuntoEncuentroPage({super.key});
@@ -109,34 +110,7 @@ class InfoPuntoEncuentroPage extends StatelessWidget {
       ),
 
       // ---- Barra inferior ----
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 3, // Esta sería la pestaña de "Información"
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.location_on_outlined),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.info_outline),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: '',
-          ),
-        ],
-      ),
+      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 3),
     );
   }
 }

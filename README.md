@@ -6,8 +6,8 @@
 1. Inicio de Sesion 👍🏻
 2. Crear Cuenta 👍🏻
 3. Pagina de Inicio 👍🏻
-4. Chats Globales
-5. Chat grupal por hora
+4. Chats Globales [primo]
+5. Chat grupal por hora [primo]
 6. Salidas Grupales
 7. Seleccion de Paradero y Micro
 8. Salida Grupal (Lista de Personas)
@@ -65,6 +65,7 @@ flutter run --release
 
 ## Promp pendiente
 - antes de seguir me gustaria saber si hay lugares en los que tendria que cambiar la zona horaria para que no me de problema mas tarde la fecha y la hora
+- 12 chats por paradero y son 4 paraderos, ademas de tener 3 salidas por chat.
 
 ## Cosas a mejorar y a agregar
 - Crear chats para cada salida.

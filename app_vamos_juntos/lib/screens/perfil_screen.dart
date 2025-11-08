@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/barra_navegacion.dart';
 
 class PerfilPage extends StatelessWidget {
   const PerfilPage({super.key});
@@ -146,34 +147,7 @@ class PerfilPage extends StatelessWidget {
       ),
 
       // ---- Barra inferior ----
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.blue.shade800,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 4, // Esta es la pestaña de perfil
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.location_on_outlined),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.info_outline),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: '',
-          ),
-        ],
-      ),
+      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 4),
     );
   }
 }
