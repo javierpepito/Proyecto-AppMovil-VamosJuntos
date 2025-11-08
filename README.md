@@ -21,13 +21,13 @@
 * Modelo de datos para: 
     - usuarios (id, nombre, apellido, carrera, telefono_personal, email)
 
-    - salidas (id, chat_fk, punto_encuentro, hora_salida, /micros/)
+    - salidas (id, chat_fk, punto_encuentro, hora_salida, estado)
 
-    - salida_participantes (id, salida_fk, usuario_fk, /estado/)
+    - salida_participantes (id, salida_fk, usuario_fk, micro)
 
     - chat_participantes (id, chat_fk, usuario_fk)
 
-    - chats (id, destino o paradero, hora_inicio, hora_salida, salidas grupales)
+    - chats (id, destino o paradero, hora_inicio, hora_termino, fecha, estado)
 
     - mensajes (id, chat_fk, usuario_fk, contenido, hora_enviado)
 
@@ -61,6 +61,9 @@ flutter devices
 ```bash
 flutter run --release
 ```
+
+## Promp pendiente
+- antes de seguir me gustaria saber si hay lugares en los que tendria que cambiar la zona horaria para que no me de problema mas tarde la fecha y la hora
 
 ## Cosas a mejorar y a agregar
 - Crear chats para cada salida.
