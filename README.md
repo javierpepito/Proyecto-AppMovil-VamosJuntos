@@ -58,6 +58,10 @@ flutter doctor
 flutter devices
 ```
 
+```bash
+flutter run --release
+```
+
 ## Cosas a mejorar y a agregar
 - Crear chats para cada salida.
 - Agregar funcionalidad de foto de perfil en los datos.
