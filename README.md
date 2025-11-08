@@ -16,22 +16,20 @@
 11. Perfil
 
 ## Models
+- usuarios (id, nombre, apellido, carrera, telefono_personal, email)
+
+- salidas (id, chat_fk, punto_encuentro, hora_salida, estado)
+
+- salida_participantes (id, salida_fk, usuario_fk, micro)
+
+- chat_participantes (id, chat_fk, usuario_fk)
+
+- chats (id, destino o paradero, hora_inicio, hora_termino, fecha, estado)
+
+- mensajes (id, chat_fk, usuario_fk, contenido, hora_enviado)
 
 ## Parte del Primo
-* Modelo de datos para: 
-    - usuarios (id, nombre, apellido, carrera, telefono_personal, email)
-
-    - salidas (id, chat_fk, punto_encuentro, hora_salida, estado)
-
-    - salida_participantes (id, salida_fk, usuario_fk, micro)
-
-    - chat_participantes (id, chat_fk, usuario_fk)
-
-    - chats (id, destino o paradero, hora_inicio, hora_termino, fecha, estado)
-
-    - mensajes (id, chat_fk, usuario_fk, contenido, hora_enviado)
-
-* Mockups a realizar: 1, 2, 3 y 4
+* Mockups a realizar: 4
 
 ## Parte del Chetar
 * Mokcups a realizar: 5, 6, 7, 8
@@ -39,7 +37,10 @@
 ## Parte del Cristian
 * Mockups a realizar: 9, 10, 11
 
-## Cosas que deben saber sobre Flutter
+## Seguridad de Supabase
+Aqui va la seguridad de Supabase que fue deshabilitada, pero es altamente recomendable implementar.
++ Se deshabilito RLS y politicas en las tablas.
++ Se deshabilito la comfirmacion de correo electronico.
 
 ## Comandos
 ```bash
