@@ -45,6 +45,12 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/logo.png
+    - assets/images/paradero1.png
+    - assets/images/paradero2.png
+    - assets/images/paradero3.png
+    - assets/images/paradero4.png
+    - assets/images/mapa.png
+    - assets/images/hall_principal.png
 
   # fonts:
   #   - family: Schyler
