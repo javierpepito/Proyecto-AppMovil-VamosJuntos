@@ -24,10 +24,20 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleSignIn() async {
+    // Validaciones
+    if (_emailController.text.trim().isEmpty) {
+      _mostrarError('Por favor ingresa tu correo');
+      return;
+    }
+    if (_passwordController.text.isEmpty) {
+      _mostrarError('Por favor ingresa tu contraseña');
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      await _authService.signIn(
+      await _authService.iniciarSesion(
         email: _emailController.text,
         password: _passwordController.text,
       );
@@ -40,15 +50,22 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        _mostrarError(e.toString().replaceAll('Exception: ', ''));
       }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  void _mostrarError(String mensaje) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensaje),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
@@ -72,8 +89,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                     labelText: 'Correo Institucional',
+                    prefixIcon: const Icon(Icons.email),
                   ),
                   keyboardType: TextInputType.emailAddress,
+                  enabled: !_isLoading,
                 ),
                 const SizedBox(height: 20),
                 
@@ -83,7 +102,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                     labelText: 'Contraseña',
+                    prefixIcon: const Icon(Icons.lock),
                   ),
+                  enabled: !_isLoading,
+                  onSubmitted: (_) => _handleSignIn(),
                 ),
                 const SizedBox(height: 30),
                 
@@ -99,7 +121,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       elevation: 3,
                     ),
                     child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
                         : const Text('Iniciar Sesión', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                 ),

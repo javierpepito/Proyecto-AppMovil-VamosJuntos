@@ -7,11 +7,11 @@ class AuthService {
   factory AuthService() => _instance;
   AuthService._internal();
 
-  User? get currentUser => supabase.auth.currentUser;
-  bool get isAuthenticated => currentUser != null;
+  User? get usuarioActual => supabase.auth.currentUser;
+  bool get estaAutenticado => usuarioActual != null;
 
-  // Iniciar sesión
-  Future<UserModel> signIn({
+  /// Iniciar sesión
+  Future<UserModel> iniciarSesion({
     required String email,
     required String password,
   }) async {
@@ -25,22 +25,30 @@ class AuthService {
         throw Exception('Error al iniciar sesión');
       }
 
-      final profileData = await supabase
-          .from('profiles')
+      // Obtener datos del usuario desde la tabla 'usuarios'
+      final usuarioData = await supabase
+          .from('usuarios')
           .select()
           .eq('id', response.user!.id)
           .single();
 
-      return UserModel.fromJson(profileData);
+      return UserModel.fromJson(usuarioData);
     } on AuthException catch (e) {
-      throw Exception(e.message);
+      // Mensajes de error en español
+      if (e.message.contains('Invalid login credentials')) {
+        throw Exception('Correo o contraseña incorrectos');
+      } else if (e.message.contains('Email not confirmed')) {
+        throw Exception('Debes confirmar tu correo electrónico');
+      } else {
+        throw Exception('Error de autenticación: ${e.message}');
+      }
     } catch (e) {
       throw Exception('Error inesperado: $e');
     }
   }
 
-  // Registrar usuario - ACTUALIZADO CON NOMBRE Y APELLIDO
-  Future<UserModel> signUp({
+  /// Registrar nuevo usuario
+  Future<UserModel> registrarUsuario({
     required String nombre,
     required String apellido,
     required String email,
@@ -49,59 +57,148 @@ class AuthService {
     required String telefono,
   }) async {
     try {
+      // Validaciones
+      if (nombre.trim().isEmpty) {
+        throw Exception('El nombre es obligatorio');
+      }
+      if (apellido.trim().isEmpty) {
+        throw Exception('El apellido es obligatorio');
+      }
       if (password.length < 6) {
         throw Exception('La contraseña debe tener al menos 6 caracteres');
       }
 
+      // Crear usuario en Auth
       final response = await supabase.auth.signUp(
         email: email.trim(),
         password: password,
       );
 
       if (response.user == null) {
-        throw Exception('Error al crear usuario');
+        throw Exception('Error al crear usuario en el sistema de autenticación');
       }
 
-      final profileData = {
+      // Preparar datos del perfil
+      final usuarioData = {
         'id': response.user!.id,
         'nombre': nombre.trim(),
         'apellido': apellido.trim(),
-        'carrera': carrera.trim(),
-        'telefono_personal': telefono.trim(),
+        'carrera': carrera.trim().isNotEmpty ? carrera.trim() : null,
+        'telefono_personal': telefono.trim().isNotEmpty ? telefono.trim() : null,
         'email': email.trim(),
       };
 
-      await supabase.from('profiles').insert(profileData);
+      // Insertar en la tabla 'usuarios'
+      await supabase.from('usuarios').insert(usuarioData);
 
-      return UserModel.fromJson(profileData);
+      return UserModel.fromJson(usuarioData);
     } on AuthException catch (e) {
-      throw Exception(e.message);
+      // Mensajes de error en español
+      if (e.message.contains('already registered')) {
+        throw Exception('Este correo ya está registrado');
+      } else if (e.message.contains('invalid email')) {
+        throw Exception('El formato del correo no es válido');
+      } else {
+        throw Exception('Error de registro: ${e.message}');
+      }
+    } on PostgrestException catch (e) {
+      // Errores de base de datos
+      if (e.code == '23505') {
+        throw Exception('Este correo ya está registrado');
+      } else {
+        throw Exception('Error en la base de datos: ${e.message}');
+      }
     } catch (e) {
       throw Exception('Error inesperado: $e');
     }
   }
 
-  // Obtener perfil del usuario
-  Future<UserModel> getUserProfile() async {
+  /// Obtener perfil del usuario actual
+  Future<UserModel> obtenerPerfilUsuario() async {
     try {
-      if (currentUser == null) {
+      if (usuarioActual == null) {
         throw Exception('No hay usuario autenticado');
       }
 
       final data = await supabase
-          .from('profiles')
+          .from('usuarios')
           .select()
-          .eq('id', currentUser!.id)
+          .eq('id', usuarioActual!.id)
+          .single();
+
+      return UserModel.fromJson(data);
+    } on PostgrestException catch (e) {
+      throw Exception('Error al obtener perfil: ${e.message}');
+    } catch (e) {
+      throw Exception('Error inesperado: $e');
+    }
+  }
+
+  /// Actualizar perfil del usuario
+  Future<UserModel> actualizarPerfil({
+    String? nombre,
+    String? apellido,
+    String? carrera,
+    String? telefono,
+  }) async {
+    try {
+      if (usuarioActual == null) {
+        throw Exception('No hay usuario autenticado');
+      }
+
+      final datosActualizar = <String, dynamic>{};
+      
+      if (nombre != null && nombre.trim().isNotEmpty) {
+        datosActualizar['nombre'] = nombre.trim();
+      }
+      if (apellido != null && apellido.trim().isNotEmpty) {
+        datosActualizar['apellido'] = apellido.trim();
+      }
+      if (carrera != null) {
+        datosActualizar['carrera'] = carrera.trim().isNotEmpty ? carrera.trim() : null;
+      }
+      if (telefono != null) {
+        datosActualizar['telefono_personal'] = telefono.trim().isNotEmpty ? telefono.trim() : null;
+      }
+
+      if (datosActualizar.isEmpty) {
+        throw Exception('No hay datos para actualizar');
+      }
+
+      final data = await supabase
+          .from('usuarios')
+          .update(datosActualizar)
+          .eq('id', usuarioActual!.id)
+          .select()
           .single();
 
       return UserModel.fromJson(data);
     } catch (e) {
-      throw Exception('Error al obtener perfil: $e');
+      throw Exception('Error al actualizar perfil: $e');
     }
   }
 
-  // Cerrar sesión
-  Future<void> signOut() async {
-    await supabase.auth.signOut();
+  /// Cerrar sesión
+  Future<void> cerrarSesion() async {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      throw Exception('Error al cerrar sesión: $e');
+    }
+  }
+
+  /// Verificar si el email ya está registrado
+  Future<bool> emailYaRegistrado(String email) async {
+    try {
+      final data = await supabase
+          .from('usuarios')
+          .select('id')
+          .eq('email', email.trim())
+          .maybeSingle();
+
+      return data != null;
+    } catch (e) {
+      return false;
+    }
   }
 }

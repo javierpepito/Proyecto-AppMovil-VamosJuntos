@@ -17,28 +17,52 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _cargarDatosUsuario();
   }
 
-  Future<void> _loadUserData() async {
+  Future<void> _cargarDatosUsuario() async {
     try {
-      final user = await _authService.getUserProfile();
+      final user = await _authService.obtenerPerfilUsuario();
       setState(() {
-        _userName = user.nombreCompleto;  // Usa el getter nombreCompleto
+        _userName = user.nombreCompleto;
         _isLoading = false;
       });
     } catch (e) {
-      setState(() => _isLoading = false);
+      setState(() {
+        _userName = 'Usuario';
+        _isLoading = false;
+      });
     }
   }
 
-  Future<void> _signOut() async {
-    await _authService.signOut();
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+  Future<void> _cerrarSesion() async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cerrar sesión'),
+        content: const Text('¿Estás seguro que deseas cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true && mounted) {
+      await _authService.cerrarSesion();
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
     }
   }
 
@@ -52,7 +76,11 @@ class _HomeScreenState extends State<HomeScreen> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(icon: const Icon(Icons.notifications_outlined, color: Colors.black), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.logout, color: Colors.black), onPressed: _signOut),
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.black),
+            onPressed: _cerrarSesion,
+            tooltip: 'Cerrar sesión',
+          ),
         ],
       ),
       body: _isLoading
@@ -111,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(color: const Color(0xFFFF4081), borderRadius: BorderRadius.circular(15)),
-                    child: const Text('Consejo de seguridad: Antes de salir tu celular vigila tus rutas', style: TextStyle(color: Colors.white, fontSize: 15), textAlign: TextAlign.center),
+                    child: const Text('Consejo de seguridad: Antes de salir revisa tus rutas', style: TextStyle(color: Colors.white, fontSize: 15), textAlign: TextAlign.center),
                   ),
                   const SizedBox(height: 20),
                   const Center(child: Text('Versión - 1.0', style: TextStyle(color: Color(0xFF00BCD4), fontSize: 14, fontWeight: FontWeight.w500))),

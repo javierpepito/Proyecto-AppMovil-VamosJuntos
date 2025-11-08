@@ -10,6 +10,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
   final _apellidoController = TextEditingController();
   final _carreraController = TextEditingController();
@@ -33,17 +34,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _handleSignUp() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Las contraseñas no coinciden')),
-      );
+      _mostrarError('Las contraseñas no coinciden');
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      await _authService.signUp(
+      await _authService.registrarUsuario(
         nombre: _nombreController.text,
         apellido: _apellidoController.text,
         email: _emailController.text,
@@ -53,25 +56,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('¡Cuenta creada exitosamente!')),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
+        _mostrarExito('¡Cuenta creada exitosamente!');
+        
+        // Esperar un momento antes de navegar
+        await Future.delayed(const Duration(seconds: 1));
+        
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        _mostrarError(e.toString().replaceAll('Exception: ', ''));
       }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  void _mostrarError(String mensaje) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensaje),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _mostrarExito(String mensaje) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensaje),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
@@ -90,63 +113,165 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset('assets/images/logo.png', width: 120, height: 120, fit: BoxFit.contain),
-                const SizedBox(height: 15),
-                const Text('VAMOJUNTOS', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1), letterSpacing: 1.2)),
-                const SizedBox(height: 40),
-                const Text('Ingresa tus datos para crearte una cuenta:', style: TextStyle(fontSize: 18, color: Colors.black)),
-                const SizedBox(height: 20),
-                
-                // Campo Nombre
-                TextField(
-                  controller: _nombreController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    labelText: 'Nombre',
-                  ),
-                ),
-                const SizedBox(height: 20),
-                
-                // Campo Apellido
-                TextField(
-                  controller: _apellidoController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    labelText: 'Apellido',
-                  ),
-                ),
-                const SizedBox(height: 20),
-                
-                TextField(controller: _carreraController, decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), labelText: 'Carrera')),
-                const SizedBox(height: 20),
-                TextField(controller: _telefonoController, decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), labelText: 'Teléfono Personal'), keyboardType: TextInputType.phone),
-                const SizedBox(height: 20),
-                TextField(controller: _emailController, decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), labelText: 'Correo Institucional'), keyboardType: TextInputType.emailAddress),
-                const SizedBox(height: 20),
-                TextField(controller: _passwordController, obscureText: true, decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), labelText: 'Contraseña')),
-                const SizedBox(height: 20),
-                TextField(controller: _confirmPasswordController, obscureText: true, decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), labelText: 'Confirmar Contraseña')),
-                const SizedBox(height: 30),
-                
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleSignUp,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0D47A1),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                      elevation: 3,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/images/logo.png', width: 120, height: 120, fit: BoxFit.contain),
+                  const SizedBox(height: 15),
+                  const Text('VAMOJUNTOS', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1), letterSpacing: 1.2)),
+                  const SizedBox(height: 40),
+                  const Text('Ingresa tus datos para crearte una cuenta:', style: TextStyle(fontSize: 18, color: Colors.black)),
+                  const SizedBox(height: 20),
+                  
+                  // Campo Nombre
+                  TextFormField(
+                    controller: _nombreController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      labelText: 'Nombre *',
+                      prefixIcon: const Icon(Icons.person),
                     ),
-                    child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('Crear Cuenta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    enabled: !_isLoading,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'El nombre es obligatorio';
+                      }
+                      return null;
+                    },
                   ),
-                ),
-                const SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 20),
+                  
+                  // Campo Apellido
+                  TextFormField(
+                    controller: _apellidoController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      labelText: 'Apellido *',
+                      prefixIcon: const Icon(Icons.person_outline),
+                    ),
+                    enabled: !_isLoading,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'El apellido es obligatorio';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Campo Carrera
+                  TextFormField(
+                    controller: _carreraController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      labelText: 'Carrera',
+                      prefixIcon: const Icon(Icons.school),
+                    ),
+                    enabled: !_isLoading,
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Campo Teléfono
+                  TextFormField(
+                    controller: _telefonoController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      labelText: 'Teléfono Personal',
+                      prefixIcon: const Icon(Icons.phone),
+                    ),
+                    keyboardType: TextInputType.phone,
+                    enabled: !_isLoading,
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Campo Email
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      labelText: 'Correo Institucional *',
+                      prefixIcon: const Icon(Icons.email),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    enabled: !_isLoading,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'El correo es obligatorio';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Ingresa un correo válido';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Campo Contraseña
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      labelText: 'Contraseña *',
+                      prefixIcon: const Icon(Icons.lock),
+                    ),
+                    enabled: !_isLoading,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'La contraseña es obligatoria';
+                      }
+                      if (value.length < 6) {
+                        return 'Mínimo 6 caracteres';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Campo Confirmar Contraseña
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      labelText: 'Confirmar Contraseña *',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                    ),
+                    enabled: !_isLoading,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Confirma tu contraseña';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 30),
+                  
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleSignUp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0D47A1),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                        elevation: 3,
+                      ),
+                      child: _isLoading 
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : const Text('Crear Cuenta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
