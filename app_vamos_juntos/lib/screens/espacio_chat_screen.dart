@@ -4,6 +4,7 @@ import '../models/chat_model.dart';
 import '../models/mensaje.model.dart';
 import '../services/chat_service.dart';
 import '../services/auth_service.dart';
+import 'lista_salidas_screen.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final ChatModel chat;
@@ -161,7 +162,33 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         ),
         backgroundColor: Colors.blue.shade800,
         foregroundColor: Colors.white,
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SalidasListScreen(chat: widget.chat),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.blue.shade800,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+            child: const Text(
+              'Salidas Grupales',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
+    
       body: Column(
         children: [
           // Banner de advertencia si está por cerrar

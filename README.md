@@ -66,7 +66,7 @@ flutter pub get
 
 ## Promp pendiente
 - antes de seguir me gustaria saber si hay lugares en los que tendria que cambiar la zona horaria para que no me de problema mas tarde la fecha y la hora
-- 12 chats por paradero y son 4 paraderos, ademas de tener 3 salidas por chat.
+- solucionar problema de que si un usuario se une a un chat y sale y se vuelve a unir en la base de datos muestra dos registros.
 
 ## Cosas a mejorar y a agregar
 - Crear chats para cada salida.
