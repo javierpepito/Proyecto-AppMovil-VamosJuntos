@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/supabase_config.dart';
 import 'screens/login_screen.dart';
+import 'services/chat_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,11 +12,13 @@ void main() async {
     url: SupabaseConfig.supabaseUrl,
     anonKey: SupabaseConfig.supabaseAnonKey,
   );
+
+  // Inicializar sistema de chats
+  await ChatService().inicializarSistema();
   
   runApp(const MyApp());
 }
 
-// Acceso global al cliente de Supabase
 final supabase = Supabase.instance.client;
 
 class MyApp extends StatelessWidget {

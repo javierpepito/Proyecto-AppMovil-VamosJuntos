@@ -13,17 +13,43 @@ class SalidaModel {
     required this.estado,
   });
 
-  // Verificar si la salida está abierta
+  // Verificar si la salida está abierta en BD
   bool get estaAbierta => estado == 'abierta';
 
-  // Verificar si está disponible (abierta y no ha pasado la hora)
+  // Verificar si está realmente disponible (BD + tiempo real)
   bool get estaDisponible {
     if (estado != 'abierta') return false;
-    return DateTime.now().isBefore(horaSalida);
+    
+    final ahora = DateTime.now();
+    // La salida está disponible hasta 5 minutos después de la hora
+    // (para dar tiempo a llegar al punto de encuentro)
+    final margen = horaSalida.add(const Duration(minutes: 5));
+    
+    return ahora.isBefore(margen);
+  }
+
+  // Verificar si ya pasó
+  bool get yaPaso {
+    if (estado == 'cerrada' || estado == 'cancelada') return true;
+    
+    final ahora = DateTime.now();
+    final margen = horaSalida.add(const Duration(minutes: 5));
+    
+    return ahora.isAfter(margen);
   }
 
   // Verificar si está en progreso
   bool get enProgreso => estado == 'en_progreso';
+
+  // Verificar si está próxima (menos de 10 minutos)
+  bool get estaProxima {
+    if (!estaDisponible) return false;
+    
+    final ahora = DateTime.now();
+    final diferencia = horaSalida.difference(ahora).inMinutes;
+    
+    return diferencia <= 10 && diferencia >= 0;
+  }
 
   // Hora formateada "14:30"
   String get horaFormateada {
@@ -33,7 +59,8 @@ class SalidaModel {
   // Tiempo restante hasta la salida
   String get tiempoRestante {
     final ahora = DateTime.now();
-    if (horaSalida.isBefore(ahora)) {
+    
+    if (yaPaso) {
       return 'Ya partió';
     }
     
@@ -43,9 +70,24 @@ class SalidaModel {
       return '${diferencia.inHours}h ${diferencia.inMinutes % 60}min';
     } else if (diferencia.inMinutes > 0) {
       return '${diferencia.inMinutes}min';
-    } else {
+    } else if (diferencia.inSeconds > 0) {
       return 'Saliendo ahora';
+    } else {
+      return 'Ya partió';
     }
+  }
+
+  // Estado visual
+  String get estadoVisual {
+    if (yaPaso) return 'Finalizada';
+    if (estaProxima) return 'Próxima';
+    if (estaDisponible) return 'Disponible';
+    return 'No disponible';
+  }
+
+  // Debería actualizarse en BD
+  bool get deberiaActualizarseEnBD {
+    return yaPaso && estado == 'abierta';
   }
 
   // Convertir de JSON a objeto

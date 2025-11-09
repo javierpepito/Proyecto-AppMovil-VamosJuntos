@@ -6,14 +6,14 @@
 1. Inicio de Sesion 👍🏻
 2. Crear Cuenta 👍🏻
 3. Pagina de Inicio 👍🏻
-4. Chats Globales [primo]
-5. Chat grupal por hora [primo]
+4. Chats Globales 
+5. Chat grupal por hora 
 6. Salidas Grupales
 7. Seleccion de Paradero y Micro
 8. Salida Grupal (Lista de Personas)
-9. Informacion de los paraderos
-10. Informacion de los puntos de encuentro
-11. Perfil
+9. Informacion de los paraderos 👍🏻
+10. Informacion de los puntos de encuentro 👍🏻
+11. Perfil 👍🏻
 
 ## Models
 - usuarios (id, nombre, apellido, carrera, telefono_personal, email)
@@ -27,9 +27,6 @@
 - chats (id, destino o paradero, hora_inicio, hora_termino, fecha, estado)
 
 - mensajes (id, chat_fk, usuario_fk, contenido, hora_enviado)
-
-## Parte del Primo
-* Mockups a realizar: 4
 
 ## Parte del Chetar
 * Mokcups a realizar: 5, 6, 7, 8
@@ -61,6 +58,10 @@ flutter devices
 
 ```bash
 flutter run --release
+```
+
+```bash
+flutter pub get
 ```
 
 ## Promp pendiente
