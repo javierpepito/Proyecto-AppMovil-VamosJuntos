@@ -6,10 +6,10 @@
 1. Inicio de Sesion 👍🏻
 2. Crear Cuenta 👍🏻
 3. Pagina de Inicio 👍🏻
-4. Chats Globales 
-5. Chat grupal por hora 
-6. Salidas Grupales
-7. Seleccion de Paradero y Micro
+4. Chats Globales 👍🏻
+5. Chat grupal por hora 👍🏻
+6. Salidas Grupales 
+7. Seleccion de Paradero 👍🏻
 8. Salida Grupal (Lista de Personas)
 9. Informacion de los paraderos 👍🏻
 10. Informacion de los puntos de encuentro 👍🏻
