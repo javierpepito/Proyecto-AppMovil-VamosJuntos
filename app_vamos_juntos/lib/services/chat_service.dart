@@ -11,12 +11,24 @@ class ChatService {
   factory ChatService() => _instance;
   ChatService._internal();
 
+  DateTime _getChileTime() {
+    return DateTime.now().toUtc().subtract(const Duration(hours: 3));
+  }
+
+  String _getChileDateString() {
+    final chileTime = _getChileTime();
+    return '${chileTime.year}-${chileTime.month.toString().padLeft(2, '0')}-${chileTime.day.toString().padLeft(2, '0')}';
+  }
+
   /// Inicializar sistema de chats (llamar al iniciar la app)
   Future<void> inicializarSistema() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final ultimaEjecucion = prefs.getString('ultima_inicializacion_chats');
-      final hoy = DateTime.now().toIso8601String().split('T')[0];
+      final hoy = _getChileDateString(); 
+      
+      debugPrint('📅 Fecha de Chile: $hoy');
+      debugPrint('📅 Última ejecución: $ultimaEjecucion');
       
       if (ultimaEjecucion == hoy) {
         debugPrint('✅ Sistema de chats ya inicializado hoy');
@@ -41,46 +53,55 @@ class ChatService {
 
   /// Actualizar estados de chats y salidas vencidos
   Future<void> _actualizarEstadosVencidos() async {
-  try {
-    // Obtener hora actual de Chile
-    final ahoraChile = DateTime.now().toUtc().subtract(const Duration(hours: 3));
-    final horaActual = '${ahoraChile.hour.toString().padLeft(2, '0')}:${ahoraChile.minute.toString().padLeft(2, '0')}:00';
-    final fechaHoy = '${ahoraChile.year}-${ahoraChile.month.toString().padLeft(2, '0')}-${ahoraChile.day.toString().padLeft(2, '0')}';
-    
-    // Cerrar chats cuya hora de término ya pasó
-    await supabase
-        .from('chats')
-        .update({'estado': 'finalizado'})
-        .eq('fecha', fechaHoy)
-        .eq('estado', 'activo')
-        .lt('hora_termino', horaActual);
-    
-    // Cerrar salidas que ya pasaron
-    await supabase
-        .from('salidas')
-        .update({'estado': 'cerrada'})
-        .eq('estado', 'abierta')
-        .lt('hora_salida', ahoraChile.toIso8601String());
-    
-    debugPrint('✅ Estados actualizados');
-  } catch (e) {
-    debugPrint('⚠️ Error actualizando estados: $e');
+    try {
+      final ahoraChile = _getChileTime();
+      final horaActual = '${ahoraChile.hour.toString().padLeft(2, '0')}:${ahoraChile.minute.toString().padLeft(2, '0')}:00';
+      final fechaHoy = _getChileDateString();
+      
+      debugPrint('🕐 Actualizando estados - Hora Chile: ${ahoraChile.toString()}');
+      
+      // Cerrar chats cuya hora de término ya pasó
+      await supabase
+          .from('chats')
+          .update({'estado': 'finalizado'})
+          .eq('fecha', fechaHoy)
+          .eq('estado', 'activo')
+          .lt('hora_termino', horaActual);
+      
+      // Cerrar salidas que ya pasaron
+      await supabase
+          .from('salidas')
+          .update({'estado': 'cerrada'})
+          .eq('estado', 'abierta')
+          .lt('hora_salida', ahoraChile.toIso8601String());
+      
+      debugPrint('✅ Estados actualizados');
+    } catch (e) {
+      debugPrint('⚠️ Error actualizando estados: $e');
+    }
   }
-}
 
   /// Generar chats del día actual
   Future<void> generarChatsDelDia() async {
     try {
+      debugPrint('📞 Llamando a generar_chats_del_dia()...');
       await supabase.rpc('generar_chats_del_dia');
       debugPrint('✅ Chats del día generados');
     } catch (e) {
       debugPrint('⚠️ Error generando chats: $e');
+      // Imprimir el error completo para debugging
+      if (e is PostgrestException) {
+        debugPrint('   Código: ${e.code}');
+        debugPrint('   Mensaje: ${e.message}');
+        debugPrint('   Detalles: ${e.details}');
+      }
     }
   }
 
   /// Cerrar chats antiguos
   Future<void> cerrarChatsAntiguos() async {
     try {
+      debugPrint('📞 Llamando a cerrar_chats_antiguos()...');
       await supabase.rpc('cerrar_chats_antiguos');
       debugPrint('✅ Chats antiguos cerrados');
     } catch (e) {
@@ -91,8 +112,9 @@ class ChatService {
   /// Generar salidas para todos los chats activos de hoy
   Future<void> generarSalidasParaTodosLosChats() async {
     try {
-      final hoy = DateTime.now();
-      final fechaStr = '${hoy.year}-${hoy.month.toString().padLeft(2, '0')}-${hoy.day.toString().padLeft(2, '0')}';
+      final fechaStr = _getChileDateString(); // ⭐ CAMBIO
+      
+      debugPrint('🔍 Buscando chats del día: $fechaStr');
       
       final response = await supabase
           .from('chats')
@@ -101,6 +123,8 @@ class ChatService {
           .eq('estado', 'activo');
 
       final chats = response as List;
+      
+      debugPrint('📊 Chats encontrados: ${chats.length}');
 
       for (var chat in chats) {
         try {
@@ -113,9 +137,12 @@ class ChatService {
           final salidasExistentes = salidasResponse as List;
 
           if (salidasExistentes.isEmpty) {
+            debugPrint('   Generando salidas para chat: ${chat['id']}');
             await supabase.rpc('generar_salidas_para_chat', params: {
               'chat_id_param': chat['id'],
             });
+          } else {
+            debugPrint('   Chat ${chat['id']} ya tiene salidas');
           }
         } catch (e) {
           debugPrint('⚠️ Error generando salidas para chat ${chat['id']}: $e');
@@ -149,8 +176,7 @@ class ChatService {
         final fechaStr = '${fecha.year}-${fecha.month.toString().padLeft(2, '0')}-${fecha.day.toString().padLeft(2, '0')}';
         query = query.eq('fecha', fechaStr);
       } else {
-        final hoy = DateTime.now();
-        final fechaStr = '${hoy.year}-${hoy.month.toString().padLeft(2, '0')}-${hoy.day.toString().padLeft(2, '0')}';
+        final fechaStr = _getChileDateString();
         query = query.eq('fecha', fechaStr);
       }
 
@@ -177,6 +203,8 @@ class ChatService {
     }
   }
 
+  // ... resto de métodos sin cambios ...
+  
   /// Obtener detalles de un chat específico
   Future<ChatModel> obtenerChat(String chatId) async {
     try {
@@ -205,7 +233,6 @@ class ChatService {
   /// Unirse a un chat
   Future<void> unirseAChat(String chatId, String usuarioId) async {
     try {
-      // Verificar que el chat esté disponible
       final puedeAcceder = await puedeAccederAlChat(chatId);
       if (!puedeAcceder) {
         throw Exception('Este chat ya no está disponible');
@@ -249,7 +276,6 @@ class ChatService {
           .select('id')
           .eq('chat_id', chatId);
 
-      // En Supabase v2, simplemente contamos los elementos de la lista
       return (response as List).length;
     } catch (e) {
       debugPrint('Error obteniendo participantes: $e');
@@ -264,7 +290,6 @@ class ChatService {
     required String contenido,
   }) async {
     try {
-      // Verificar que el chat esté disponible
       final puedeAcceder = await puedeAccederAlChat(chatId);
       if (!puedeAcceder) {
         throw Exception('Este chat ya no está disponible para enviar mensajes');
@@ -339,7 +364,6 @@ class ChatService {
   /// Obtener salidas de un chat (solo disponibles)
   Future<List<SalidaModel>> obtenerSalidasDeChat(String chatId, {bool soloDisponibles = true}) async {
     try {
-      // Actualizar estados primero
       await _actualizarEstadosVencidos();
       
       final response = await supabase
@@ -352,7 +376,6 @@ class ChatService {
           .map((json) => SalidaModel.fromJson(json))
           .toList();
 
-      // Filtrar solo disponibles si se solicita
       if (soloDisponibles) {
         salidas = salidas.where((salida) => salida.estaDisponible).toList();
       }
