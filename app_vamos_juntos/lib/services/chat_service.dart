@@ -41,31 +41,32 @@ class ChatService {
 
   /// Actualizar estados de chats y salidas vencidos
   Future<void> _actualizarEstadosVencidos() async {
-    try {
-      final ahora = DateTime.now();
-      final horaActual = '${ahora.hour.toString().padLeft(2, '0')}:${ahora.minute.toString().padLeft(2, '0')}:00';
-      final fechaHoy = '${ahora.year}-${ahora.month.toString().padLeft(2, '0')}-${ahora.day.toString().padLeft(2, '0')}';
-      
-      // Cerrar chats cuya hora de término ya pasó
-      await supabase
-          .from('chats')
-          .update({'estado': 'finalizado'})
-          .eq('fecha', fechaHoy)
-          .eq('estado', 'activo')
-          .lt('hora_termino', horaActual);
-      
-      // Cerrar salidas que ya pasaron
-      await supabase
-          .from('salidas')
-          .update({'estado': 'cerrada'})
-          .eq('estado', 'abierta')
-          .lt('hora_salida', ahora.toIso8601String());
-      
-      debugPrint('✅ Estados actualizados');
-    } catch (e) {
-      debugPrint('⚠️ Error actualizando estados: $e');
-    }
+  try {
+    // Obtener hora actual de Chile
+    final ahoraChile = DateTime.now().toUtc().subtract(const Duration(hours: 3));
+    final horaActual = '${ahoraChile.hour.toString().padLeft(2, '0')}:${ahoraChile.minute.toString().padLeft(2, '0')}:00';
+    final fechaHoy = '${ahoraChile.year}-${ahoraChile.month.toString().padLeft(2, '0')}-${ahoraChile.day.toString().padLeft(2, '0')}';
+    
+    // Cerrar chats cuya hora de término ya pasó
+    await supabase
+        .from('chats')
+        .update({'estado': 'finalizado'})
+        .eq('fecha', fechaHoy)
+        .eq('estado', 'activo')
+        .lt('hora_termino', horaActual);
+    
+    // Cerrar salidas que ya pasaron
+    await supabase
+        .from('salidas')
+        .update({'estado': 'cerrada'})
+        .eq('estado', 'abierta')
+        .lt('hora_salida', ahoraChile.toIso8601String());
+    
+    debugPrint('✅ Estados actualizados');
+  } catch (e) {
+    debugPrint('⚠️ Error actualizando estados: $e');
   }
+}
 
   /// Generar chats del día actual
   Future<void> generarChatsDelDia() async {
