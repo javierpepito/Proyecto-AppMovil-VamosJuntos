@@ -76,10 +76,13 @@ flutter pub get
 ```
 
 ## Cosas pendientes
+- se crean dobles chats debo arreglarlos.
+- Corregir todas las horas, de mensajes y salidas.
+- Micros correspondiente de cada paradero.
 - Validación de correo como estudiante de inacap.
 - Falta edición de carrera o numero de telefono.
 - Logica de salirse de chat y salida.
-- Roles???
+- Roles??? Proponer correccion de solo unos chats pero que se diga cual es el rol de cada usuario.
 - Notificaciones
 - Control de malas palabras
 - Bloque de usuarios
