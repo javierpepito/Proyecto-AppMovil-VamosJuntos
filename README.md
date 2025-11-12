@@ -15,6 +15,9 @@
 10. Informacion de los puntos de encuentro 👍🏻
 11. Perfil 👍🏻
 
+## Requerimientos Funcionales Faltantes:
+1. 
+
 ## Models
 - usuarios (id, nombre, apellido, carrera, telefono_personal, email)
 
@@ -27,12 +30,6 @@
 - chats (id, destino o paradero, hora_inicio, hora_termino, fecha, estado)
 
 - mensajes (id, chat_fk, usuario_fk, contenido, hora_enviado)
-
-## Parte del Chetar
-* Mokcups a realizar: 5, 6, 7, 8
-
-## Parte del Cristian
-* Mockups a realizar: 9, 10, 11
 
 ## Seguridad de Supabase
 Aqui va la seguridad de Supabase que fue deshabilitada, pero es altamente recomendable implementar.
@@ -65,7 +62,6 @@ flutter pub get
 ```
 
 ## Promp pendiente
-- antes de seguir me gustaria saber si hay lugares en los que tendria que cambiar la zona horaria para que no me de problema mas tarde la fecha y la hora
 - solucionar problema de que si un usuario se une a un chat y sale y se vuelve a unir en la base de datos muestra dos registros.
 
 ## Cosas a mejorar y a agregar

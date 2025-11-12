@@ -41,9 +41,16 @@ class SalidaService {
     }
   }
 
-  /// Unirse a una salida
   Future<void> unirseASalida(String salidaId, String usuarioId, {String? micro}) async {
     try {
+      final salidaActiva = await _tieneSalidaActiva(usuarioId);
+      if (salidaActiva != null) {
+        throw Exception(
+          'Ya estás en otra salida grupal a las ${salidaActiva.horaFormateada}. '
+          'Debes salir de esa salida primero.'
+        );
+      }
+
       // Verificar que la salida esté disponible
       final salida = await obtenerSalida(salidaId);
       if (!salida.estaDisponible) {
@@ -67,7 +74,35 @@ class SalidaService {
       }
       throw Exception('Error al unirse a la salida: ${e.message}');
     } catch (e) {
-      throw Exception('Error al unirse a la salida: $e');
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+  Future<SalidaModel?> _tieneSalidaActiva(String usuarioId) async {
+    try {
+      final response = await supabase
+          .from('salida_participantes')
+          .select('salida_id, salidas!inner(*)')
+          .eq('usuario_id', usuarioId);
+
+      final participaciones = response as List;
+      
+      if (participaciones.isEmpty) return null;
+
+      // Buscar la primera salida disponible
+      for (var participacion in participaciones) {
+        final salidaData = participacion['salidas'];
+        final salida = SalidaModel.fromJson(salidaData);
+
+        // Si encontramos una salida disponible, devolverla
+        if (salida.estaDisponible) {
+          return salida;
+        }
+      }
+
+      return null;
+    } catch (e) {
+      return null;
     }
   }
 
