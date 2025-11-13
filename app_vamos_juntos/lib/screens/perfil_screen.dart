@@ -58,7 +58,7 @@ class _PerfilPageState extends State<PerfilPage> {
         content: TextField(
           controller: controller,
           keyboardType: esCarrera ? TextInputType.text : TextInputType.phone,
-          maxLength: esCarrera ? 100 : 12,
+          maxLength: esCarrera ? 50 : 12,
           decoration: InputDecoration(
             labelText: titulo,
             hintText: esCarrera ? 'Ej: Ingeniería en Informática' : 'Ej: +56912345678',
