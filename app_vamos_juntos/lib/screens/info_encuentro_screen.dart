@@ -32,20 +32,20 @@ class InfoPuntoEncuentroPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'El primer punto de encuentro al cual los usuarios podrían acudir para la Salida Grupal sería el hall principal del INACAP, donde pueden esperar sentados a los otros participantes de la salida.',
+              'Este es el hall principal del INACAP, donde los usuarios pueden esperar y reunirse antes de irse del instituto. El hall cuenta con áreas de descanso, señalización clara y acceso a servicios básicos para la comodidad de los usuarios.',
               style: TextStyle(fontSize: 15, height: 1.4, color: Colors.black87),
             ),
             const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(15),
               child: Image.asset(
-                'assets/images/hall_principal.jpg', // <-- Cambia esta imagen
+                'assets/images/hall_principal.png',
                 fit: BoxFit.cover,
               ),
             ),
             const SizedBox(height: 24),
 
-            // ---- Sección Mapa ----
+            // ---- Sección Mapa de la Institución ----
             const Text(
               'Mapa de la Institución',
               style: TextStyle(
@@ -58,7 +58,7 @@ class InfoPuntoEncuentroPage extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(15),
               child: Image.asset(
-                'assets/images/mapa_institucion.jpg', // <-- Cambia esta imagen
+                'assets/images/mapa.png',
                 fit: BoxFit.cover,
               ),
             ),
@@ -97,7 +97,7 @@ class InfoPuntoEncuentroPage extends StatelessWidget {
             // ---- Texto adicional (como dice el mockup) ----
             const Center(
               child: Text(
-                'Agregar algo de texto',
+                'En el mapa se puede observar el punto de encuentro señalado con un círculo azul cerca de la salida principal del instituto.',
                 style: TextStyle(
                   fontSize: 16,
                   fontStyle: FontStyle.italic,
