@@ -44,6 +44,95 @@ class _PerfilPageState extends State<PerfilPage> {
     }
   }
 
+  Future<void> _editarCampo({
+    required String titulo,
+    required String valorActual,
+    required bool esCarrera,
+  }) async {
+    final controller = TextEditingController(text: valorActual);
+    
+    final resultado = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Editar $titulo'),
+        content: TextField(
+          controller: controller,
+          keyboardType: esCarrera ? TextInputType.text : TextInputType.phone,
+          maxLength: esCarrera ? 100 : 12,
+          decoration: InputDecoration(
+            labelText: titulo,
+            hintText: esCarrera ? 'Ej: Ingeniería en Informática' : 'Ej: +56912345678',
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final valor = controller.text.trim();
+              if (valor.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('El campo no puede estar vacío'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+              Navigator.pop(context, valor);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue.shade800,
+            ),
+            child: const Text('Guardar', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (resultado != null && resultado != valorActual) {
+      await _guardarCambios(
+        carrera: esCarrera ? resultado : null,
+        telefono: !esCarrera ? resultado : null,
+      );
+    }
+  }
+
+  Future<void> _guardarCambios({String? carrera, String? telefono}) async {
+    setState(() => _isLoading = true);
+    
+    try {
+      await _authService.actualizarPerfil(
+        carrera: carrera,
+        telefonoPersonal: telefono,
+      );
+      
+      await _cargarDatosUsuario();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Perfil actualizado exitosamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al actualizar: ${e.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _cerrarSesion() async {
     final confirmar = await showDialog<bool>(
       context: context,
@@ -68,7 +157,6 @@ class _PerfilPageState extends State<PerfilPage> {
       try {
         await _authService.cerrarSesion();
         if (mounted) {
-          // Limpiar todo el stack de navegación y redirigir a login
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const LoginScreen()),
             (route) => false,
@@ -91,8 +179,6 @@ class _PerfilPageState extends State<PerfilPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      // ---- Contenido principal ----
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -155,43 +241,65 @@ class _PerfilPageState extends State<PerfilPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Carrera
-                          Text.rich(
-                            TextSpan(
+                          // Carrera con icono de edición
+                          InkWell(
+                            onTap: () => _editarCampo(
+                              titulo: 'Carrera',
+                              valorActual: _usuario?.carrera ?? '',
+                              esCarrera: true,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const TextSpan(
-                                  text: 'Carrera: ',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                Expanded(
+                                  child: Text.rich(
+                                    TextSpan(
+                                      children: [
+                                        const TextSpan(
+                                          text: 'Carrera: ',
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        TextSpan(
+                                          text: _usuario?.carrera ?? 'No especificada',
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                                TextSpan(
-                                  text: _usuario?.carrera ?? 'No especificada',
-                                ),
+                                const Icon(Icons.edit, color: Colors.blue, size: 20),
                               ],
                             ),
                           ),
                           const Divider(height: 20, thickness: 1),
 
                           // Teléfono con icono de edición
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      const TextSpan(
-                                        text: 'Teléfono Personal: ',
-                                        style: TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                      TextSpan(
-                                        text: _usuario?.telefonoPersonal ?? 'No especificado',
-                                      ),
-                                    ],
+                          InkWell(
+                            onTap: () => _editarCampo(
+                              titulo: 'Teléfono Personal',
+                              valorActual: _usuario?.telefonoPersonal ?? '',
+                              esCarrera: false,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text.rich(
+                                    TextSpan(
+                                      children: [
+                                        const TextSpan(
+                                          text: 'Teléfono Personal: ',
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        TextSpan(
+                                          text: _usuario?.telefonoPersonal ?? 'No especificado',
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const Icon(Icons.edit, color: Colors.black54, size: 20),
-                            ],
+                                const Icon(Icons.edit, color: Colors.blue, size: 20),
+                              ],
+                            ),
                           ),
 
                           const Divider(height: 20, thickness: 1),
@@ -237,8 +345,6 @@ class _PerfilPageState extends State<PerfilPage> {
                 ),
               ),
       ),
-
-      // ---- Barra inferior ----
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 4),
     );
   }

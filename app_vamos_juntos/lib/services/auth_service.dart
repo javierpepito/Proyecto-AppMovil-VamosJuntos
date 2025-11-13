@@ -135,48 +135,44 @@ class AuthService {
   }
 
   /// Actualizar perfil del usuario
-  Future<UserModel> actualizarPerfil({
-    String? nombre,
-    String? apellido,
-    String? carrera,
-    String? telefono,
-  }) async {
-    try {
-      if (usuarioActual == null) {
-        throw Exception('No hay usuario autenticado');
-      }
-
-      final datosActualizar = <String, dynamic>{};
-      
-      if (nombre != null && nombre.trim().isNotEmpty) {
-        datosActualizar['nombre'] = nombre.trim();
-      }
-      if (apellido != null && apellido.trim().isNotEmpty) {
-        datosActualizar['apellido'] = apellido.trim();
-      }
-      if (carrera != null) {
-        datosActualizar['carrera'] = carrera.trim().isNotEmpty ? carrera.trim() : null;
-      }
-      if (telefono != null) {
-        datosActualizar['telefono_personal'] = telefono.trim().isNotEmpty ? telefono.trim() : null;
-      }
-
-      if (datosActualizar.isEmpty) {
-        throw Exception('No hay datos para actualizar');
-      }
-
-      final data = await supabase
-          .from('usuarios')
-          .update(datosActualizar)
-          .eq('id', usuarioActual!.id)
-          .select()
-          .single();
-
-      return UserModel.fromJson(data);
-    } catch (e) {
-      throw Exception('Error al actualizar perfil: $e');
+Future<void> actualizarPerfil({
+  String? nombre,
+  String? apellido,
+  String? carrera,
+  String? telefonoPersonal,
+}) async {
+  try {
+    if (usuarioActual == null) {
+      throw Exception('No hay usuario autenticado');
     }
+
+    final datosActualizar = <String, dynamic>{};
+    
+    if (nombre != null && nombre.trim().isNotEmpty) {
+      datosActualizar['nombre'] = nombre.trim();
+    }
+    if (apellido != null && apellido.trim().isNotEmpty) {
+      datosActualizar['apellido'] = apellido.trim();
+    }
+    if (carrera != null) {
+      datosActualizar['carrera'] = carrera.trim().isNotEmpty ? carrera.trim() : null;
+    }
+    if (telefonoPersonal != null) {
+      datosActualizar['telefono_personal'] = telefonoPersonal.trim().isNotEmpty ? telefonoPersonal.trim() : null;
+    }
+
+    if (datosActualizar.isEmpty) {
+      throw Exception('No hay datos para actualizar');
+    }
+
+    await supabase
+        .from('usuarios')
+        .update(datosActualizar)
+        .eq('id', usuarioActual!.id);
+  } catch (e) {
+    throw Exception('Error al actualizar perfil: $e');
   }
+}
 
   /// Cerrar sesión
   Future<void> cerrarSesion() async {
