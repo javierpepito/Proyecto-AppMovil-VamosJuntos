@@ -76,7 +76,6 @@ flutter pub get
 ```
 
 ## Cosas pendientes
-- Corregir todas las horas de mensajes.
 - Validación de correo como estudiante de inacap.
 - Falta edición de carrera o numero de telefono. ✓
 - Roles??? Proponer correccion de solo unos chats pero que se diga cual es el rol de cada usuario.
