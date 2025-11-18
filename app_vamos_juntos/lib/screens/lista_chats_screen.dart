@@ -14,8 +14,8 @@ class ChatsListScreen extends StatefulWidget {
 class _ChatsListScreenState extends State<ChatsListScreen> {
   final _chatService = ChatService();
   
-  List<ChatModel> _chats = [];
-  Map<String, int> _participantes = {}; // No puede ser final porque se modifica
+  final List<ChatModel> _chats = [];
+  final Map<String, int> _participantes = {};
   bool _isLoading = true;
   String? _paraderoSeleccionado;
 
@@ -34,10 +34,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
 
   Future<void> _inicializarChats() async {
     try {
-      // Generar chats del día y cerrar antiguos
       await _chatService.inicializarSistema();
-      
-      // Cargar chats
       await _cargarChats();
     } catch (e) {
       if (mounted) {
@@ -57,7 +54,6 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
         soloDisponibles: true,
       );
 
-      // Obtener número de participantes para cada chat
       _participantes.clear();
       for (var chat in chats) {
         final numParticipantes = await _chatService.obtenerNumeroParticipantes(chat.id);
@@ -65,7 +61,8 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
       }
 
       setState(() {
-        _chats = chats;
+        _chats.clear();
+        _chats.addAll(chats);
         _isLoading = false;
       });
     } catch (e) {
@@ -106,7 +103,6 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
       ),
       body: Column(
         children: [
-          // Filtro de paradero
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -153,8 +149,6 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
               ],
             ),
           ),
-
-          // Lista de chats
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -179,7 +173,6 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
                               padding: const EdgeInsets.only(bottom: 12),
                               child: InkWell(
                                 onTap: () {
-                                  // Validar antes de entrar
                                   if (!chat.estaDisponible) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
@@ -238,7 +231,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
                                             Row(
                                               children: [
                                                 Text(
-                                                  'Miembros Unidos: $numParticipantes',
+                                                  'Personas unidas a una salida: $numParticipantes',
                                                   style: const TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 14,

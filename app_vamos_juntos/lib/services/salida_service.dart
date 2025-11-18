@@ -198,4 +198,56 @@ class SalidaService {
       return null;
     }
   }
+
+  /// Suscribirse a cambios en participantes de una salida
+  RealtimeChannel suscribirseAParticipantes(
+    String salidaId,
+    Function() onCambio,
+  ) {
+    return supabase
+        .channel('salida_participantes_$salidaId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'salida_participantes',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'salida_id',
+            value: salidaId,
+          ),
+          callback: (payload) {
+            debugPrint('🆕 Nuevo participante en salida');
+            onCambio();
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.delete,
+          schema: 'public',
+          table: 'salida_participantes',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'salida_id',
+            value: salidaId,
+          ),
+          callback: (payload) {
+            debugPrint('👋 Participante salió de salida');
+            onCambio();
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'salida_participantes',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'salida_id',
+            value: salidaId,
+          ),
+          callback: (payload) {
+            debugPrint('🔄 Participante actualizó su micro');
+            onCambio();
+          },
+        )
+        .subscribe();
+  }
 }

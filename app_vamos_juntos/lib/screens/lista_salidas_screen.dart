@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; 
 import '../models/chat_model.dart';
 import '../models/salida_model.dart';
 import '../services/salida_service.dart';
@@ -19,10 +20,12 @@ class _SalidasListScreenState extends State<SalidasListScreen> {
   final _authService = AuthService();
 
   List<SalidaModel> _salidas = [];
-  Map<String, int> _participantesPorSalida = {};
-  Map<String, bool> _estoyUnido = {};
+  final Map<String, int> _participantesPorSalida = {};
+  final Map<String, bool> _estoyUnido = {};
   bool _isLoading = true;
   String? _currentUserId;
+
+  final List<RealtimeChannel> _channels = []; 
 
   @override
   void initState() {
@@ -31,13 +34,28 @@ class _SalidasListScreenState extends State<SalidasListScreen> {
     _cargarSalidas();
   }
 
+  @override
+  void dispose() {
+    // Limpiar todas las subscripciones
+    for (var channel in _channels) {
+      channel.unsubscribe();
+    }
+    super.dispose();
+  }
+
   Future<void> _cargarSalidas() async {
     setState(() => _isLoading = true);
 
     try {
       final salidas = await _salidaService.obtenerSalidasDeChat(widget.chat.id);
 
-      // Obtener información de participación para cada salida
+      // Limpiar subscripciones anteriores
+      for (var channel in _channels) {
+        channel.unsubscribe();
+      }
+      _channels.clear();
+
+      // Obtener información y suscribirse a cada salida
       for (var salida in salidas) {
         final numParticipantes = await _salidaService.obtenerNumeroParticipantes(salida.id);
         _participantesPorSalida[salida.id] = numParticipantes;
@@ -46,6 +64,25 @@ class _SalidasListScreenState extends State<SalidasListScreen> {
           final estoyUnido = await _salidaService.estaEnSalida(salida.id, _currentUserId!);
           _estoyUnido[salida.id] = estoyUnido;
         }
+
+        // Suscribirse a cambios en participantes de esta salida
+        final channel = _salidaService.suscribirseAParticipantes(
+          salida.id,
+          () async {
+            // Actualizar solo esta salida
+            final numParticipantes = await _salidaService.obtenerNumeroParticipantes(salida.id);
+            if (_currentUserId != null) {
+              final estoyUnido = await _salidaService.estaEnSalida(salida.id, _currentUserId!);
+              if (mounted) {
+                setState(() {
+                  _participantesPorSalida[salida.id] = numParticipantes;
+                  _estoyUnido[salida.id] = estoyUnido;
+                });
+              }
+            }
+          },
+        );
+        _channels.add(channel);
       }
 
       setState(() {
@@ -163,7 +200,7 @@ class _SalidasListScreenState extends State<SalidasListScreen> {
                                               chat: widget.chat,
                                             ),
                                           ),
-                                        ).then((_) => _cargarSalidas());
+                                        ); 
                                       }
                                     : null,
                                 child: Container(
@@ -231,7 +268,7 @@ class _SalidasListScreenState extends State<SalidasListScreen> {
                                       Container(
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withValues(alpha: 0.9),
+                                          color: const Color.fromARGB(255, 123, 92, 92).withValues(alpha: 0.9),
                                           borderRadius: BorderRadius.circular(10),
                                         ),
                                         child: Column(

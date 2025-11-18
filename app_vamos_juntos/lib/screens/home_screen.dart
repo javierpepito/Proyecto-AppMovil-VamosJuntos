@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import '../services/salida_service.dart';
+//import '../services/salida_service.dart';
 import '../models/salida_model.dart';
 import '../models/chat_model.dart';
 import '../main.dart'; 
@@ -18,7 +18,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _authService = AuthService();
-  final _salidaService = SalidaService();
   
   String _userName = 'Usuario';
   bool _isLoading = true;

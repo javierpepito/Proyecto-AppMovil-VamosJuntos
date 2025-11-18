@@ -76,12 +76,9 @@ flutter pub get
 ```
 
 ## Cosas pendientes
-- se crean dobles chats debo arreglarlos.
-- Corregir todas las horas, de mensajes y salidas.
-- Micros correspondiente de cada paradero.
+- Corregir todas las horas de mensajes.
 - Validación de correo como estudiante de inacap.
 - Falta edición de carrera o numero de telefono. ✓
-- Logica de salirse de chat y salida (solucionar problema de que si un usuario se une a un chat y sale y se vuelve a unir en la base de datos muestra dos registros).
 - Roles??? Proponer correccion de solo unos chats pero que se diga cual es el rol de cada usuario.
 - Notificaciones
 - Control de malas palabras
@@ -91,6 +88,4 @@ flutter pub get
 ## Cosas a mejorar y a agregar
 - Crear chats para cada salida.
 - Agregar funcionalidad de foto de perfil en los datos.
-
-## Pendientes para el prototipo
-- personas unidas y su salida de chat y reuniones
+- contador de personas en linea.

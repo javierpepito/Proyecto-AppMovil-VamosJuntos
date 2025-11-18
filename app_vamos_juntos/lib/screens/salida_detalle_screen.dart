@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; 
 import '../models/chat_model.dart';
 import '../models/salida_model.dart';
 import '../models/salida_participante_model.dart';
@@ -23,30 +24,49 @@ class SalidaDetalleScreen extends StatefulWidget {
 class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
   final _salidaService = SalidaService();
   final _authService = AuthService();
-  final _paraderoService = ParaderoService(); 
+  final _paraderoService = ParaderoService();
 
   List<SalidaParticipanteModel> _participantes = [];
   bool _isLoading = true;
   bool _estoyUnido = false;
   String? _currentUserId;
   String? _miMicro;
+  List<String> _micros = [];
 
-  List<String> _micros = []; 
+  RealtimeChannel? _channel; 
 
   @override
   void initState() {
     super.initState();
     _currentUserId = _authService.usuarioActual?.id;
     _cargarDatos();
+    _suscribirseAParticipantes(); 
+  }
+
+  @override
+  void dispose() {
+    _channel?.unsubscribe(); 
+    super.dispose();
+  }
+
+  // Suscribirse a cambios en participantes
+  void _suscribirseAParticipantes() {
+    _channel = _salidaService.suscribirseAParticipantes(
+      widget.salida.id,
+      () {
+        // Cuando hay un cambio, recargar los datos
+        _cargarDatos();
+      },
+    );
   }
 
   Future<void> _cargarDatos() async {
-    setState(() => _isLoading = true);
+    if (_participantes.isEmpty) {
+      setState(() => _isLoading = true);
+    }
 
     try {
-      // ⭐ NUEVO: Cargar micros del paradero desde la BD
       final micros = await _paraderoService.obtenerMicrosPorParadero(widget.chat.paradero);
-      
       final participantes = await _salidaService.obtenerParticipantes(widget.salida.id);
 
       if (_currentUserId != null) {
@@ -60,7 +80,7 @@ class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
       }
 
       setState(() {
-        _micros = micros; 
+        _micros = micros;
         _participantes = participantes;
         _isLoading = false;
       });
@@ -89,7 +109,6 @@ class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
         );
       }
 
-      await _cargarDatos();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -135,7 +154,6 @@ class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
         );
       }
 
-      await _cargarDatos();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -148,7 +166,6 @@ class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
   Future<void> _seleccionarMicro() async {
     if (_currentUserId == null) return;
 
-    // Validar que hay micros disponibles
     if (_micros.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -195,7 +212,6 @@ class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
         );
       }
 
-      await _cargarDatos();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

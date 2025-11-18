@@ -268,17 +268,17 @@ class ChatService {
     }
   }
 
-  /// Obtener número de participantes en un chat
+  /// Obtener número de participantes ACTIVOS (con salidas activas) en un chat
   Future<int> obtenerNumeroParticipantes(String chatId) async {
     try {
       final response = await supabase
-          .from('chat_participantes')
-          .select('id')
-          .eq('chat_id', chatId);
+          .rpc('contar_participantes_activos_chat', params: {
+            'chat_id_param': chatId,
+          });
 
-      return (response as List).length;
+      return response as int? ?? 0;
     } catch (e) {
-      debugPrint('Error obteniendo participantes: $e');
+      debugPrint('Error obteniendo participantes activos: $e');
       return 0;
     }
   }
@@ -356,6 +356,44 @@ class ChatService {
             } catch (e) {
               debugPrint('Error obteniendo mensaje completo: $e');
             }
+          },
+        )
+        .subscribe();
+  }
+
+  /// Suscribirse a cambios en participantes de un chat
+  RealtimeChannel suscribirseAParticipantesChat(
+    String chatId,
+    Function() onCambio,
+  ) {
+    return supabase
+        .channel('chat_participantes_$chatId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'chat_participantes',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'chat_id',
+            value: chatId,
+          ),
+          callback: (payload) {
+            debugPrint('🆕 Nuevo participante en chat');
+            onCambio();
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.delete,
+          schema: 'public',
+          table: 'chat_participantes',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'chat_id',
+            value: chatId,
+          ),
+          callback: (payload) {
+            debugPrint('👋 Participante salió del chat');
+            onCambio();
           },
         )
         .subscribe();
