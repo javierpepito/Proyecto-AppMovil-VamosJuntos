@@ -81,16 +81,17 @@ flutter pub get
 - Micros correspondiente de cada paradero.
 - Validación de correo como estudiante de inacap.
 - Falta edición de carrera o numero de telefono. ✓
-- Logica de salirse de chat y salida.
+- Logica de salirse de chat y salida (solucionar problema de que si un usuario se une a un chat y sale y se vuelve a unir en la base de datos muestra dos registros).
 - Roles??? Proponer correccion de solo unos chats pero que se diga cual es el rol de cada usuario.
 - Notificaciones
 - Control de malas palabras
 - Bloque de usuarios
 - ULTIMA REVISION: Donde se verificar tanto el diseño como las funcionaldiades.
 
-## Promp pendiente
-- solucionar problema de que si un usuario se une a un chat y sale y se vuelve a unir en la base de datos muestra dos registros.
-
 ## Cosas a mejorar y a agregar
 - Crear chats para cada salida.
 - Agregar funcionalidad de foto de perfil en los datos.
+
+## Pendientes para el prototipo
+- Horas correectas
+- personas unidas
