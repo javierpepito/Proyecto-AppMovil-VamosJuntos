@@ -13,6 +13,11 @@ class SalidaModel {
     required this.estado,
   });
 
+  // Obtener hora de Chile
+  DateTime get _chileTime {
+    return DateTime.now().toUtc().subtract(const Duration(hours: 3));
+  }
+
   // Verificar si la salida está abierta en BD
   bool get estaAbierta => estado == 'abierta';
 
@@ -20,9 +25,7 @@ class SalidaModel {
   bool get estaDisponible {
     if (estado != 'abierta') return false;
     
-    final ahora = DateTime.now();
-    // La salida está disponible hasta 5 minutos después de la hora
-    // (para dar tiempo a llegar al punto de encuentro)
+    final ahora = _chileTime; // Usar hora de Chile
     final margen = horaSalida.add(const Duration(minutes: 5));
     
     return ahora.isBefore(margen);
@@ -32,7 +35,7 @@ class SalidaModel {
   bool get yaPaso {
     if (estado == 'cerrada' || estado == 'cancelada') return true;
     
-    final ahora = DateTime.now();
+    final ahora = _chileTime; // Usar hora de Chile
     final margen = horaSalida.add(const Duration(minutes: 5));
     
     return ahora.isAfter(margen);
@@ -45,7 +48,7 @@ class SalidaModel {
   bool get estaProxima {
     if (!estaDisponible) return false;
     
-    final ahora = DateTime.now();
+    final ahora = _chileTime; // Usar hora de Chile
     final diferencia = horaSalida.difference(ahora).inMinutes;
     
     return diferencia <= 10 && diferencia >= 0;
@@ -58,7 +61,7 @@ class SalidaModel {
 
   // Tiempo restante hasta la salida
   String get tiempoRestante {
-    final ahora = DateTime.now();
+    final ahora = _chileTime; // Usar hora de Chile
     
     if (yaPaso) {
       return 'Ya partió';
@@ -92,11 +95,14 @@ class SalidaModel {
 
   // Convertir de JSON a objeto
   factory SalidaModel.fromJson(Map<String, dynamic> json) {
+    final utcTime = DateTime.parse(json['hora_salida'] as String);
+    final chileTime = utcTime.subtract(const Duration(hours: 3)); 
+    
     return SalidaModel(
       id: json['id'] as String,
       chatId: json['chat_id'] as String?,
       puntoEncuentro: json['punto_encuentro'] as String,
-      horaSalida: DateTime.parse(json['hora_salida'] as String),
+      horaSalida: chileTime,
       estado: json['estado'] as String? ?? 'abierta',
     );
   }

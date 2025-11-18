@@ -93,5 +93,4 @@ flutter pub get
 - Agregar funcionalidad de foto de perfil en los datos.
 
 ## Pendientes para el prototipo
-- Horas correectas
-- personas unidas
+- personas unidas y su salida de chat y reuniones

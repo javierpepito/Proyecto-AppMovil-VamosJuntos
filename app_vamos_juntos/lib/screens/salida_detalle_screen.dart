@@ -4,6 +4,7 @@ import '../models/salida_model.dart';
 import '../models/salida_participante_model.dart';
 import '../services/salida_service.dart';
 import '../services/auth_service.dart';
+import '../services/paradero_service.dart';
 
 class SalidaDetalleScreen extends StatefulWidget {
   final SalidaModel salida;
@@ -22,6 +23,7 @@ class SalidaDetalleScreen extends StatefulWidget {
 class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
   final _salidaService = SalidaService();
   final _authService = AuthService();
+  final _paraderoService = ParaderoService(); 
 
   List<SalidaParticipanteModel> _participantes = [];
   bool _isLoading = true;
@@ -29,7 +31,7 @@ class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
   String? _currentUserId;
   String? _miMicro;
 
-  final List<String> _micros = ['307', '314', '303'];
+  List<String> _micros = []; 
 
   @override
   void initState() {
@@ -42,6 +44,9 @@ class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // ⭐ NUEVO: Cargar micros del paradero desde la BD
+      final micros = await _paraderoService.obtenerMicrosPorParadero(widget.chat.paradero);
+      
       final participantes = await _salidaService.obtenerParticipantes(widget.salida.id);
 
       if (_currentUserId != null) {
@@ -55,6 +60,7 @@ class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
       }
 
       setState(() {
+        _micros = micros; 
         _participantes = participantes;
         _isLoading = false;
       });
@@ -142,6 +148,17 @@ class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
   Future<void> _seleccionarMicro() async {
     if (_currentUserId == null) return;
 
+    // Validar que hay micros disponibles
+    if (_micros.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No hay micros disponibles para este paradero'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final microSeleccionado = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -174,7 +191,7 @@ class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Micro $microSeleccionado seleccionado')),
+          SnackBar(content: Text('Micro $microSeleccionado seleccionada')),
         );
       }
 
