@@ -75,14 +75,26 @@ flutter run --release
 flutter pub get
 ```
 
-## Cosas pendientes
-- Validación de correo como estudiante de inacap.
-- Falta edición de carrera o numero de telefono. ✓
-- Roles??? Proponer correccion de solo unos chats pero que se diga cual es el rol de cada usuario.
-- Notificaciones
-- Control de malas palabras
-- Bloque de usuarios
+## Cosas pendientes de la APP
+- Usar seguridad de supabase. [Javier]
+- Validar entradas. [Cesar]
+- Validación de correo como estudiante o profesor de inacap. [Javier]
+- Definir el funcionamiento de los roles. [Javier]
+- Notificaciones y lista de ultimas notificaciones. [Cristian]
+- Control de malas palabras y/o bloqueo de usuarios. [Cesar]
+- Optimizacion de cosas, indexando o paginando. [Cristian]
 - ULTIMA REVISION: Donde se verificar tanto el diseño como las funcionaldiades.
+
+## Cosas pendientes del informe
+- Diseño del plan de pruebas (tipos, casos, criterios de aceptación, herramientas).
+- Realización de pruebas funcionales, de seguridad y rendimiento sobre el prototipo. Con capturas de pantallas, reportes y resultados.
+- Informe con los errores detectados, su clasificación, priorización y acciones correctivas.
+- Versión final funcional y segura del prototipo.
+- Diagramas de estructura, comportamiento e interacción actualizados. Diagramas UML (clases, secuencia, casos de uso, actividad).
+- Bitácora de trabajo SCRUM (sprints, backlog)
+
+- PRESENTACION FINAL 
+- A tomar en cuenta: (Mencionar practicas OWASP, Demostrar la correccion del codigo)
 
 ## Cosas a mejorar y a agregar
 - Crear chats para cada salida.
