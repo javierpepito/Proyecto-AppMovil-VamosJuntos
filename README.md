@@ -77,6 +77,7 @@ flutter pub get
 
 ## Cosas pendientes de la APP
 - Usar seguridad de supabase. [Javier]
+- Pantalla de carga reutilizable [Javier]
 - Validar entradas. [Cesar]
 - Validación de correo como estudiante o profesor de inacap. [Javier]
 - Definir el funcionamiento de los roles. [Javier]
