@@ -329,6 +329,33 @@ class _SalidaDetalleScreenState extends State<SalidaDetalleScreen> {
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              participante.usuario?.rol == 'profesor' 
+                                                  ? Icons.school 
+                                                  : Icons.person,
+                                              size: 14,
+                                              color: participante.usuario?.rol == 'profesor' 
+                                                  ? Colors.purple.shade600 
+                                                  : Colors.blue.shade600,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              participante.usuario?.rol == 'profesor' 
+                                                  ? 'Profesor' 
+                                                  : 'Estudiante',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: participante.usuario?.rol == 'profesor' 
+                                                    ? Colors.purple.shade600 
+                                                    : Colors.blue.shade600,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                         if (participante.micro != null)
                                           Text(
                                             'Micro: ${participante.micro}',

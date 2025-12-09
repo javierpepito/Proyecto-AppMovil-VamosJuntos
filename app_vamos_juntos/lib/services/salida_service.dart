@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../main.dart';
 import '../models/salida_model.dart';
 import '../models/salida_participante_model.dart';
+import 'notification_service.dart';
 
 class SalidaService {
   static final SalidaService _instance = SalidaService._internal();
@@ -63,6 +64,13 @@ class SalidaService {
         'micro': micro,
       });
 
+      // Programar notificaciones para esta salida
+      await NotificationService().programarNotificacionesSalida(
+        salidaId: salidaId,
+        horaSalida: salida.horaSalida,
+        puntoEncuentro: salida.puntoEncuentro,
+      );
+
       debugPrint('✅ Usuario unido a la salida');
     } on PostgrestException catch (e) {
       if (e.code == '23505') {
@@ -114,6 +122,9 @@ class SalidaService {
           .delete()
           .eq('salida_id', salidaId)
           .eq('usuario_id', usuarioId);
+
+      // Cancelar notificaciones de esta salida
+      await NotificationService().cancelarNotificacionesSalida(salidaId);
 
       debugPrint('✅ Usuario salió de la salida');
     } catch (e) {

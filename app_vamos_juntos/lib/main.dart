@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/supabase_config.dart';
 import 'screens/login_screen.dart';
 import 'services/chat_service.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,9 @@ void main() async {
 
   // Inicializar sistema de chats
   await ChatService().inicializarSistema();
+  
+  // Inicializar servicio de notificaciones
+  await NotificationService().initialize();
   
   runApp(const MyApp());
 }

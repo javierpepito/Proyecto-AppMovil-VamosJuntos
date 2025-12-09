@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/notification_service.dart';
 //import '../services/salida_service.dart';
 import '../models/salida_model.dart';
 import '../models/chat_model.dart';
@@ -7,6 +8,7 @@ import '../main.dart';
 import 'login_screen.dart';
 import 'lista_chats_screen.dart';
 import 'salida_detalle_screen.dart';
+import 'notificaciones_historial_screen.dart';
 import '../widgets/barra_navegacion.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,12 +20,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _authService = AuthService();
+  final _notificationService = NotificationService();
   
   String _userName = 'Usuario';
   bool _isLoading = true;
   SalidaModel? _salidaActual;
   ChatModel? _chatDeLaSalida;
   String? _currentUserId;
+  int _notificacionesNoLeidas = 0;
 
   @override
   void initState() {
@@ -42,9 +46,13 @@ class _HomeScreenState extends State<HomeScreen> {
       // Obtener salida actual del usuario
       final salidaActual = await _obtenerSalidaActual();
       
+      // Obtener número de notificaciones no leídas
+      final noLeidas = await _notificationService.obtenerNoLeidas();
+      
       setState(() {
         _userName = user.nombreCompleto;
         _salidaActual = salidaActual;
+        _notificacionesNoLeidas = noLeidas;
         _isLoading = false;
       });
     } catch (e) {
@@ -160,6 +168,15 @@ class _HomeScreenState extends State<HomeScreen> {
     ).then((_) => _cargarDatos()); // Recargar al volver
   }
 
+  void _irANotificaciones() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NotificacionesHistorialScreen(),
+      ),
+    ).then((_) => _cargarDatos()); // Recargar al volver para actualizar badge
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,9 +186,38 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-            onPressed: () {},
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+                onPressed: _irANotificaciones,
+              ),
+              if (_notificacionesNoLeidas > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Text(
+                      _notificacionesNoLeidas > 9 ? '9+' : _notificacionesNoLeidas.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.black),

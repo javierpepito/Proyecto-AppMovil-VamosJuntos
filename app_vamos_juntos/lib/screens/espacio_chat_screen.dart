@@ -250,13 +250,52 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   if (!esMio)
-                                    Text(
-                                      mensaje.usuario?.nombreCompleto ?? 'Usuario',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
-                                        color: Colors.black87,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          mensaje.usuario?.nombreCompleto ?? 'Usuario',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: mensaje.usuario?.rol == 'profesor' 
+                                                ? Colors.purple.shade100 
+                                                : Colors.blue.shade100,
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                mensaje.usuario?.rol == 'profesor' 
+                                                    ? Icons.school 
+                                                    : Icons.person,
+                                                size: 10,
+                                                color: mensaje.usuario?.rol == 'profesor' 
+                                                    ? Colors.purple.shade700 
+                                                    : Colors.blue.shade700,
+                                              ),
+                                              const SizedBox(width: 3),
+                                              Text(
+                                                mensaje.usuario?.rol == 'profesor' ? 'Prof' : 'Est',
+                                                style: TextStyle(
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: mensaje.usuario?.rol == 'profesor' 
+                                                      ? Colors.purple.shade700 
+                                                      : Colors.blue.shade700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   if (!esMio) const SizedBox(height: 4),
                                   Text(

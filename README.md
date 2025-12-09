@@ -77,10 +77,7 @@ flutter pub get
 
 ## Cosas pendientes de la APP
 - Usar seguridad de supabase. [Javier]
-- Pantalla de carga reutilizable [Javier]
 - Validar entradas. [Cesar]
-- Validación de correo como estudiante o profesor de inacap. [Javier]
-- Definir el funcionamiento de los roles. [Javier]
 - Notificaciones y lista de ultimas notificaciones. [Cristian]
 - Control de malas palabras y/o bloqueo de usuarios. [Cesar]
 - Optimizacion de cosas, indexando o paginando. [Cristian]
@@ -102,12 +99,12 @@ flutter pub get
 - Agregar funcionalidad de foto de perfil en los datos.
 - contador de personas en linea.
 
-Roles: para evitar pedir el rol ya que el usuario puede mentir se creará una lista de correos de profesores y se verificará cuando un usuario se registra para asignarle su rol respectivo. Este rol se mostrará en las salidas. 
 ## Notas importantes
-
 - Los dominios permitidos son: `@inacapmail.cl` y `@inacap.cl`
 - Los profesores deben estar registrados en la tabla `profesores` ANTES de crear su cuenta
 - Si un profesor se registra antes de estar en la tabla, recibirá rol de estudiante
 - Para cambiar el rol manualmente: `UPDATE usuarios SET rol = 'profesor' WHERE email = 'correo@inacap.cl'`
 
-Además, se debe validar que sea un correo con ese dominio, pero que exista, comprobándolo con Supabase. 
+Pero que exista el correo
+Como hacer un apk con flutter
+se puede hacer una pantalla reutilizable

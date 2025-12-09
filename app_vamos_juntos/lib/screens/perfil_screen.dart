@@ -319,6 +319,57 @@ class _PerfilPageState extends State<PerfilPage> {
                               ],
                             ),
                           ),
+
+                          const Divider(height: 20, thickness: 1),
+
+                          // Rol
+                          Row(
+                            children: [
+                              const Text(
+                                'Rol: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: _usuario?.rol == 'profesor' 
+                                      ? Colors.purple.shade100 
+                                      : Colors.blue.shade100,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: _usuario?.rol == 'profesor' 
+                                        ? Colors.purple.shade300 
+                                        : Colors.blue.shade300,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      _usuario?.rol == 'profesor' 
+                                          ? Icons.school 
+                                          : Icons.person,
+                                      size: 16,
+                                      color: _usuario?.rol == 'profesor' 
+                                          ? Colors.purple.shade700 
+                                          : Colors.blue.shade700,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _usuario?.rol == 'profesor' ? 'Profesor' : 'Estudiante',
+                                      style: TextStyle(
+                                        color: _usuario?.rol == 'profesor' 
+                                            ? Colors.purple.shade700 
+                                            : Colors.blue.shade700,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
