@@ -193,6 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       labelText: 'Correo Institucional *',
                       prefixIcon: const Icon(Icons.email),
+                      helperText: 'Usa tu correo @inacapmail.cl o @inacap.cl',
                     ),
                     keyboardType: TextInputType.emailAddress,
                     enabled: !_isLoading,
@@ -202,6 +203,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       }
                       if (!value.contains('@')) {
                         return 'Ingresa un correo válido';
+                      }
+                      final emailLower = value.trim().toLowerCase();
+                      if (!emailLower.endsWith('@inacapmail.cl') && !emailLower.endsWith('@inacap.cl')) {
+                        return 'Debe ser un correo institucional';
                       }
                       return null;
                     },

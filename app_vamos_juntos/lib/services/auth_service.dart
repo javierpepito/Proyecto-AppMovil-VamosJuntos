@@ -68,9 +68,25 @@ class AuthService {
         throw Exception('La contraseña debe tener al menos 6 caracteres');
       }
 
+      // Validar dominio institucional
+      final emailTrimmed = email.trim().toLowerCase();
+      if (!emailTrimmed.endsWith('@inacapmail.cl') && !emailTrimmed.endsWith('@inacap.cl')) {
+        throw Exception('Debes usar un correo institucional (@inacapmail.cl o @inacap.cl)');
+      }
+
+      // Verificar si el email pertenece a un profesor
+      final profesorData = await supabase
+          .from('profesores')
+          .select('email')
+          .eq('email', emailTrimmed)
+          .maybeSingle();
+
+      final esProfesor = profesorData != null;
+      final rolUsuario = esProfesor ? 'profesor' : 'estudiante';
+
       // Crear usuario en Auth
       final response = await supabase.auth.signUp(
-        email: email.trim(),
+        email: emailTrimmed,
         password: password,
       );
 
@@ -85,7 +101,8 @@ class AuthService {
         'apellido': apellido.trim(),
         'carrera': carrera.trim().isNotEmpty ? carrera.trim() : null,
         'telefono_personal': telefono.trim().isNotEmpty ? telefono.trim() : null,
-        'email': email.trim(),
+        'email': emailTrimmed,
+        'rol': rolUsuario,
       };
 
       // Insertar en la tabla 'usuarios'

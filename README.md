@@ -101,3 +101,13 @@ flutter pub get
 - Crear chats para cada salida.
 - Agregar funcionalidad de foto de perfil en los datos.
 - contador de personas en linea.
+
+Roles: para evitar pedir el rol ya que el usuario puede mentir se creará una lista de correos de profesores y se verificará cuando un usuario se registra para asignarle su rol respectivo. Este rol se mostrará en las salidas. 
+## Notas importantes
+
+- Los dominios permitidos son: `@inacapmail.cl` y `@inacap.cl`
+- Los profesores deben estar registrados en la tabla `profesores` ANTES de crear su cuenta
+- Si un profesor se registra antes de estar en la tabla, recibirá rol de estudiante
+- Para cambiar el rol manualmente: `UPDATE usuarios SET rol = 'profesor' WHERE email = 'correo@inacap.cl'`
+
+Además, se debe validar que sea un correo con ese dominio, pero que exista, comprobándolo con Supabase. 

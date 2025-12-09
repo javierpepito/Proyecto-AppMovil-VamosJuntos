@@ -5,6 +5,7 @@ class UserModel {
   final String? carrera;
   final String? telefonoPersonal;
   final String email;
+  final String rol; // 'estudiante' o 'profesor'
 
   UserModel({
     required this.id,
@@ -13,6 +14,7 @@ class UserModel {
     this.carrera,
     this.telefonoPersonal,
     required this.email,
+    this.rol = 'estudiante', // valor por defecto
   });
 
   // Nombre completo
@@ -34,6 +36,7 @@ class UserModel {
       carrera: json['carrera'] as String?,
       telefonoPersonal: json['telefono_personal'] as String?,
       email: json['email'] as String,
+      rol: json['rol'] as String? ?? 'estudiante',
     );
   }
 
@@ -46,6 +49,7 @@ class UserModel {
       'carrera': carrera,
       'telefono_personal': telefonoPersonal,
       'email': email,
+      'rol': rol,
     };
   }
 
@@ -57,6 +61,7 @@ class UserModel {
     String? carrera,
     String? telefonoPersonal,
     String? email,
+    String? rol,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -65,9 +70,10 @@ class UserModel {
       carrera: carrera ?? this.carrera,
       telefonoPersonal: telefonoPersonal ?? this.telefonoPersonal,
       email: email ?? this.email,
+      rol: rol ?? this.rol,
     );
   }
 
   @override
-  String toString() => 'UserModel(id: $id, nombre: $nombreCompleto, email: $email)';
+  String toString() => 'UserModel(id: $id, nombre: $nombreCompleto, email: $email, rol: $rol)';
 }
