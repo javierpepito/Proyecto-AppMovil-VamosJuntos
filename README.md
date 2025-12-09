@@ -76,12 +76,14 @@ flutter pub get
 ```
 
 ## Cosas pendientes de la APP
-- Usar seguridad de supabase. [Javier]
 - Validar entradas. [Cesar]
-- Notificaciones y lista de ultimas notificaciones. [Cristian]
 - Control de malas palabras y/o bloqueo de usuarios. [Cesar]
 - Optimizacion de cosas, indexando o paginando. [Cristian]
-- ULTIMA REVISION: Donde se verificar tanto el diseño como las funcionaldiades.
+- confirmacion de correo electronico ya sea por supabase o por codigo.
+- pantalla de carga al principio.
+- recordar sesion.
+- al entrar al selector de chats, que no cargen todos.
+- Usar seguridad de supabase. 
 
 ## Cosas pendientes del informe
 - Diseño del plan de pruebas (tipos, casos, criterios de aceptación, herramientas).
@@ -99,13 +101,18 @@ flutter pub get
 - Agregar funcionalidad de foto de perfil en los datos.
 - contador de personas en linea.
 
+## Iconos de la Aplicación
+El icono de la aplicación se genera automáticamente desde `assets/images/logo.png` usando `flutter_launcher_icons`.
+
+Para regenerar los iconos después de cambiar el logo:
+```bash
+dart run flutter_launcher_icons
+```
+
+La configuración está en `flutter_launcher_icons.yaml`.
+
 ## Notas importantes
 - Los dominios permitidos son: `@inacapmail.cl` y `@inacap.cl`
 - Los profesores deben estar registrados en la tabla `profesores` ANTES de crear su cuenta
 - Si un profesor se registra antes de estar en la tabla, recibirá rol de estudiante
 - Para cambiar el rol manualmente: `UPDATE usuarios SET rol = 'profesor' WHERE email = 'correo@inacap.cl'`
-
-Pero que exista el correo
-Como hacer un apk con flutter
-se puede hacer una pantalla reutilizable
-icono de la app

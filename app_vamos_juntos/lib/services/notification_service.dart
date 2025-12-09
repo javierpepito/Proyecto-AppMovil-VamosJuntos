@@ -26,6 +26,13 @@ class NotificationService {
     tz.initializeTimeZones();
     // Configurar zona horaria de Chile
     tz.setLocalLocation(tz.getLocation('America/Santiago'));
+    
+    final now = DateTime.now();
+    final tzNow = tz.TZDateTime.now(tz.local);
+    debugPrint('🌍 Zona horaria configurada: ${tz.local.name}');
+    debugPrint('🕐 DateTime.now(): $now');
+    debugPrint('🕐 TZDateTime.now(): $tzNow');
+    debugPrint('📍 Offset UTC: ${tzNow.timeZoneOffset}');
 
     // Configuración para Android
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -47,6 +54,26 @@ class NotificationService {
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
+    // CRÍTICO: Crear el canal de notificaciones en Android
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final androidPlugin = _notifications.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      
+      if (androidPlugin != null) {
+        await androidPlugin.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'salidas_channel', // DEBE coincidir con el ID usado en AndroidNotificationDetails
+            'Notificaciones de Salidas',
+            description: 'Notificaciones sobre tus próximas salidas grupales',
+            importance: Importance.high,
+            playSound: true,
+            enableVibration: true,
+          ),
+        );
+        debugPrint('✅ Canal de notificaciones creado: salidas_channel');
+      }
+    }
+
     // Solicitar permisos
     await _requestPermissions();
 
@@ -63,9 +90,25 @@ class NotificationService {
       if (status.isGranted) {
         debugPrint('✅ Permiso de notificaciones concedido');
         
-        // Solicitar permiso para alarmas exactas (Android 12+)
-        if (await Permission.scheduleExactAlarm.isDenied) {
+        // Verificar y solicitar permiso para alarmas exactas (Android 12+)
+        final alarmaStatus = await Permission.scheduleExactAlarm.status;
+        debugPrint('🔔 Estado alarmas exactas: $alarmaStatus');
+        
+        if (!alarmaStatus.isGranted) {
+          debugPrint('⚠️ Alarmas exactas NO habilitadas');
+          // En Android 12+, el usuario debe habilitarlo manualmente en configuración
           await Permission.scheduleExactAlarm.request();
+          
+          // Verificar nuevamente
+          final nuevoEstado = await Permission.scheduleExactAlarm.status;
+          if (!nuevoEstado.isGranted) {
+            debugPrint('❌ ¡IMPORTANTE! Debes habilitar "Alarmas y recordatorios" manualmente:');
+            debugPrint('   Configuración → Aplicaciones → app_vamos_juntos → Alarmas y recordatorios');
+          } else {
+            debugPrint('✅ Alarmas exactas habilitadas');
+          }
+        } else {
+          debugPrint('✅ Alarmas exactas ya habilitadas');
         }
       } else {
         debugPrint('⚠️ Permiso de notificaciones denegado');
@@ -99,8 +142,15 @@ class NotificationService {
       final tzHoraSalida = tz.TZDateTime.from(horaSalida, tz.local);
       final ahora = tz.TZDateTime.now(tz.local);
 
+      debugPrint('🕐 HORA ACTUAL (Chile): $ahora');
+      debugPrint('🕐 HORA SALIDA (Chile): $tzHoraSalida');
+      debugPrint('🕐 HORA SALIDA (Original): $horaSalida');
+
       // Notificación 10 minutos antes
       final notificacion10Min = tzHoraSalida.subtract(const Duration(minutes: 10));
+      debugPrint('🕐 NOTIF 10 MIN PARA: $notificacion10Min');
+      debugPrint('⏰ ¿10 min es futuro? ${notificacion10Min.isAfter(ahora)}');
+      
       if (notificacion10Min.isAfter(ahora)) {
         final titulo10 = '🚌 ¡Tu salida es en 10 minutos!';
         final body10 = 'Punto de encuentro: $puntoEncuentro a las ${_formatHora(horaSalida)}';
@@ -114,10 +164,14 @@ class NotificationService {
           puntoEncuentro: puntoEncuentro,
           tipo: '10min',
         );
-        debugPrint('📅 Notificación 10 min programada para: $notificacion10Min');
+        debugPrint('✅ Notificación 10 min programada para: $notificacion10Min');
+      } else {
+        debugPrint('⚠️ NO se programó notif 10 min (ya pasó la hora)');
       }
 
       // Notificación al momento de la salida
+      debugPrint('⏰ ¿Momento es futuro? ${tzHoraSalida.isAfter(ahora)}');
+      
       if (tzHoraSalida.isAfter(ahora)) {
         final tituloMomento = '🚌 ¡Es hora de partir!';
         final bodyMomento = 'Tu salida desde $puntoEncuentro está lista. ¡Nos vemos!';
@@ -131,8 +185,23 @@ class NotificationService {
           puntoEncuentro: puntoEncuentro,
           tipo: 'momento',
         );
-        debugPrint('📅 Notificación momento salida programada para: $tzHoraSalida');
+        debugPrint('✅ Notificación momento salida programada para: $tzHoraSalida');
+      } else {
+        debugPrint('⚠️ NO se programó notif momento (ya pasó la hora)');
       }
+
+      // NOTIFICACIÓN DE PRUEBA INMEDIATA (para verificar que funciona)
+      final notifPrueba = ahora.add(const Duration(seconds: 5));
+      debugPrint('🧪 Programando notificación de PRUEBA en 5 segundos: $notifPrueba');
+      await _scheduleNotification(
+        id: _getNotificationId(salidaId, 999),
+        title: '🧪 Prueba de Notificación',
+        body: 'Si ves esto, las notificaciones funcionan. Salida: $puntoEncuentro',
+        scheduledDate: notifPrueba,
+        salidaId: salidaId,
+        puntoEncuentro: puntoEncuentro,
+        tipo: 'prueba',
+      );
     } catch (e) {
       debugPrint('❌ Error al programar notificaciones: $e');
     }
@@ -180,15 +249,44 @@ class NotificationService {
           UILocalNotificationDateInterpretation.absoluteTime,
     );
 
-    // Guardar en historial cuando se programa
+    final ahoraLocal = DateTime.now();
+    final diferencia = scheduledDate.difference(ahoraLocal);
+    
+    debugPrint('📢 Notificación programada:');
+    debugPrint('   ID: $id');
+    debugPrint('   Título: $title');
+    debugPrint('   Hora programada (TZ): $scheduledDate');
+    debugPrint('   Hora actual (Local): $ahoraLocal');
+    debugPrint('   Diferencia: ${diferencia.inSeconds} segundos (${diferencia.inMinutes} minutos)');
+    
+    if (diferencia.isNegative) {
+      debugPrint('⚠️ ADVERTENCIA: La hora programada ya pasó! No se mostrará.');
+      return; // No programar si ya pasó
+    } else {
+      debugPrint('✅ Se mostrará en ${diferencia.inSeconds} segundos');
+    }
+
+    // Guardar en historial (esto es para que el usuario vea que se programó)
+    // Nota: Esto significa que aparecerá en el historial antes de que se dispare
+    final fechaHistorial = DateTime(
+      scheduledDate.year,
+      scheduledDate.month,
+      scheduledDate.day,
+      scheduledDate.hour,
+      scheduledDate.minute,
+      scheduledDate.second,
+    );
+    
     await _guardarEnHistorial(
       titulo: title,
       mensaje: body,
-      fecha: scheduledDate.toLocal(),
+      fecha: fechaHistorial,
       tipo: tipo ?? 'general',
       salidaId: salidaId,
       puntoEncuentro: puntoEncuentro,
     );
+    
+    debugPrint('💾 Guardado en historial para referencia');
   }
 
   /// Cancelar notificaciones de una salida específica
@@ -196,6 +294,7 @@ class NotificationService {
     try {
       await _notifications.cancel(_getNotificationId(salidaId, 10));
       await _notifications.cancel(_getNotificationId(salidaId, 0));
+      await _notifications.cancel(_getNotificationId(salidaId, 999)); // Prueba
       debugPrint('🔕 Notificaciones canceladas para salida: $salidaId');
     } catch (e) {
       debugPrint('❌ Error al cancelar notificaciones: $e');
@@ -206,6 +305,46 @@ class NotificationService {
   Future<void> cancelarTodasLasNotificaciones() async {
     await _notifications.cancelAll();
     debugPrint('🔕 Todas las notificaciones canceladas');
+  }
+
+  /// Mostrar notificación INMEDIATA (sin programar) - Para testing
+  Future<void> mostrarNotificacionInmediata({
+    required String titulo,
+    required String mensaje,
+  }) async {
+    if (!_initialized) {
+      await initialize();
+    }
+
+    const androidDetails = AndroidNotificationDetails(
+      'salidas_channel',
+      'Notificaciones de Salidas',
+      channelDescription: 'Notificaciones sobre tus próximas salidas grupales',
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _notifications.show(
+      999999, // ID único para pruebas
+      titulo,
+      mensaje,
+      details,
+    );
+    
+    debugPrint('✅ Notificación INMEDIATA mostrada: $titulo');
   }
 
   /// Generar ID único para notificaciones basado en salidaId y tipo
@@ -239,6 +378,22 @@ class NotificationService {
       return result ?? false;
     }
     return false;
+  }
+
+  /// Verificar si las alarmas exactas están habilitadas (Android 12+)
+  Future<bool> alarmasExactasHabilitadas() async {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final status = await Permission.scheduleExactAlarm.status;
+      return status.isGranted;
+    }
+    return true; // iOS no necesita este permiso
+  }
+
+  /// Abrir configuración de la app para habilitar alarmas exactas
+  Future<void> abrirConfiguracionAlarmas() async {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      await openAppSettings();
+    }
   }
 
   // ==================== GESTIÓN DE HISTORIAL ====================
