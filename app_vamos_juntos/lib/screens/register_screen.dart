@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import 'home_screen.dart';
+import '../utils/validators.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -20,6 +21,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
+
+  // Toggle de visibilidad
+  bool _showPassword = false;
+  bool _showConfirmPassword = false;
 
   @override
   void dispose() {
@@ -57,10 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (mounted) {
         _mostrarExito('¡Cuenta creada exitosamente!');
-        
-        // Esperar un momento antes de navegar
         await Future.delayed(const Duration(seconds: 1));
-        
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -124,8 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 40),
                   const Text('Ingresa tus datos para crearte una cuenta:', style: TextStyle(fontSize: 18, color: Colors.black)),
                   const SizedBox(height: 20),
-                  
-                  // Campo Nombre
+
                   TextFormField(
                     controller: _nombreController,
                     decoration: InputDecoration(
@@ -134,16 +135,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       prefixIcon: const Icon(Icons.person),
                     ),
                     enabled: !_isLoading,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'El nombre es obligatorio';
-                      }
-                      return null;
-                    },
+                    validator: Validators.nombre,
                   ),
                   const SizedBox(height: 20),
-                  
-                  // Campo Apellido
+
                   TextFormField(
                     controller: _apellidoController,
                     decoration: InputDecoration(
@@ -152,16 +147,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       prefixIcon: const Icon(Icons.person_outline),
                     ),
                     enabled: !_isLoading,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'El apellido es obligatorio';
-                      }
-                      return null;
-                    },
+                    validator: Validators.nombre,
                   ),
                   const SizedBox(height: 20),
-                  
-                  // Campo Carrera
+
                   TextFormField(
                     controller: _carreraController,
                     decoration: InputDecoration(
@@ -172,8 +161,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     enabled: !_isLoading,
                   ),
                   const SizedBox(height: 20),
-                  
-                  // Campo Teléfono
+
                   TextFormField(
                     controller: _telefonoController,
                     decoration: InputDecoration(
@@ -183,10 +171,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     keyboardType: TextInputType.phone,
                     enabled: !_isLoading,
+                    validator: Validators.telefono,
                   ),
                   const SizedBox(height: 20),
-                  
-                  // Campo Email
+
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -197,63 +185,47 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     keyboardType: TextInputType.emailAddress,
                     enabled: !_isLoading,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'El correo es obligatorio';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Ingresa un correo válido';
-                      }
-                      final emailLower = value.trim().toLowerCase();
-                      if (!emailLower.endsWith('@inacapmail.cl') && !emailLower.endsWith('@inacap.cl')) {
-                        return 'Debe ser un correo institucional';
-                      }
-                      return null;
-                    },
+                    validator: Validators.emailInacap,
                   ),
                   const SizedBox(height: 20),
-                  
-                  // Campo Contraseña
+
+                  // Contraseña con botón de mostrar/ocultar
                   TextFormField(
                     controller: _passwordController,
-                    obscureText: true,
+                    obscureText: !_showPassword,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       labelText: 'Contraseña *',
                       prefixIcon: const Icon(Icons.lock),
+                      helperText: 'Debe tener al menos 12 caracteres, una mayúscula, un número y un símbolo',
+                      suffixIcon: IconButton(
+                        icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => _showPassword = !_showPassword),
+                      ),
                     ),
                     enabled: !_isLoading,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'La contraseña es obligatoria';
-                      }
-                      if (value.length < 6) {
-                        return 'Mínimo 6 caracteres';
-                      }
-                      return null;
-                    },
+                    validator: (value) => Validators.passwordStrong(value, minLen: 12),
                   ),
                   const SizedBox(height: 20),
-                  
-                  // Campo Confirmar Contraseña
+
+                  // Confirmar contraseña con botón de mostrar/ocultar
                   TextFormField(
                     controller: _confirmPasswordController,
-                    obscureText: true,
+                    obscureText: !_showConfirmPassword,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       labelText: 'Confirmar Contraseña *',
                       prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(_showConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => _showConfirmPassword = !_showConfirmPassword),
+                      ),
                     ),
                     enabled: !_isLoading,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Confirma tu contraseña';
-                      }
-                      return null;
-                    },
+                    validator: (value) => Validators.passwordConfirm(value, _passwordController.text),
                   ),
                   const SizedBox(height: 30),
-                  
+
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -265,7 +237,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                         elevation: 3,
                       ),
-                      child: _isLoading 
+                      child: _isLoading
                           ? const SizedBox(
                               width: 20,
                               height: 20,

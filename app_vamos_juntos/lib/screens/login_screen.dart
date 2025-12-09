@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
+import '../utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +17,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _authService = AuthService();
   bool _isLoading = false;
 
+  // Toggle de visibilidad
+  bool _showPassword = false;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -24,13 +28,19 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleSignIn() async {
-    // Validaciones
     if (_emailController.text.trim().isEmpty) {
       _mostrarError('Por favor ingresa tu correo');
       return;
     }
     if (_passwordController.text.isEmpty) {
       _mostrarError('Por favor ingresa tu contraseña');
+      return;
+    }
+
+    // Validación de contraseña fuerte
+    final pwdError = Validators.passwordStrong(_passwordController.text, minLen: 12);
+    if (pwdError != null) {
+      _mostrarError(pwdError);
       return;
     }
 
@@ -83,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 20),
                 const Text('VAMOJUNTOS', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1), letterSpacing: 1.2)),
                 const SizedBox(height: 50),
-                
+
                 TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -95,20 +105,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   enabled: !_isLoading,
                 ),
                 const SizedBox(height: 20),
-                
+
+                // Contraseña con botón de mostrar/ocultar
                 TextField(
                   controller: _passwordController,
-                  obscureText: true,
+                  obscureText: !_showPassword,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                     labelText: 'Contraseña',
                     prefixIcon: const Icon(Icons.lock),
+                    helperText: 'Debe tener al menos 12 caracteres, una mayúscula, un número y un símbolo',
+                    suffixIcon: IconButton(
+                      icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => _showPassword = !_showPassword),
+                    ),
                   ),
                   enabled: !_isLoading,
                   onSubmitted: (_) => _handleSignIn(),
                 ),
                 const SizedBox(height: 30),
-                
+
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -130,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                
+
                 GestureDetector(
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen())),
                   child: RichText(

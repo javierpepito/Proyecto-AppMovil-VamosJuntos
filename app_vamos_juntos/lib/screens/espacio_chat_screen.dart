@@ -111,23 +111,65 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     );
   }
 
-  Future<void> _enviarMensaje() async {
+    Future<void> _enviarMensaje() async {
     if (_mensajeController.text.trim().isEmpty || _currentUserId == null) return;
 
     setState(() => _enviando = true);
 
     try {
-      await _chatService.enviarMensaje(
+      final texto = _mensajeController.text.trim();
+
+      final result = await _chatService.enviarMensaje(
         chatId: widget.chat.id,
         usuarioId: _currentUserId!,
-        contenido: _mensajeController.text,
+        contenido: texto,
       );
 
-      _mensajeController.clear();
+      if (result.bloqueadoPorProfanidad) {
+        // Snackbar simple, sin "Exception"
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result.errorAmigable ?? 'Tu mensaje contiene palabras no permitidas.')),
+          );
+        }
+
+        // Bubble local en rojo (solo para el remitente)
+        final localMsg = MensajeModel(
+          id: 'local-${DateTime.now().millisecondsSinceEpoch}',
+          chatId: widget.chat.id,
+          usuarioId: _currentUserId!,
+          contenido: texto,
+          horaEnviado: DateTime.now(),
+          usuario: null,
+          soloLocal: true,
+          esInapropiado: true,
+        );
+
+        setState(() {
+          _mensajes.add(localMsg);
+        });
+
+        _mensajeController.clear();
+        return;
+      }
+
+      // Envío exitoso: NO agregamos a la lista aquí para evitar duplicados.
+      // La suscripción en tiempo real insertará el mensaje.
+      if (result.mensaje != null) {
+        _mensajeController.clear();
+        return;
+      }
+
+      // Error genérico
+      if (result.errorAmigable != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.errorAmigable!)),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al enviar: $e')),
+          const SnackBar(content: Text('No se pudo enviar el mensaje. Inténtalo de nuevo.')),
         );
       }
     } finally {
@@ -233,6 +275,20 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         itemBuilder: (context, index) {
                           final mensaje = _mensajes[index];
                           final esMio = mensaje.esMio(_currentUserId ?? '');
+                          final esInapLocal = mensaje.soloLocal && mensaje.esInapropiado;
+
+                          // Colores y estilos
+                          final bubbleColor = esInapLocal
+                              ? Colors.red.shade50
+                              : (esMio ? Colors.blue.shade800 : Colors.grey.shade300);
+
+                          final bubbleTextColor = esInapLocal
+                              ? Colors.red.shade900
+                              : (esMio ? Colors.white : Colors.black87);
+
+                          final bubbleBorder = esInapLocal
+                              ? Border.all(color: Colors.red.shade400)
+                              : null;
 
                           return Align(
                             alignment: esMio ? Alignment.centerRight : Alignment.centerLeft,
@@ -243,13 +299,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                 maxWidth: MediaQuery.of(context).size.width * 0.7,
                               ),
                               decoration: BoxDecoration(
-                                color: esMio ? Colors.blue.shade800 : Colors.grey.shade300,
+                                color: bubbleColor,
                                 borderRadius: BorderRadius.circular(15),
+                                border: bubbleBorder,
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (!esMio)
+                                  if (!esMio && !esInapLocal)
                                     Row(
                                       children: [
                                         Text(
@@ -297,11 +354,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                         ),
                                       ],
                                     ),
-                                  if (!esMio) const SizedBox(height: 4),
+                                  if (!esMio && !esInapLocal) const SizedBox(height: 4),
                                   Text(
                                     mensaje.contenido,
                                     style: TextStyle(
-                                      color: esMio ? Colors.white : Colors.black87,
+                                      color: bubbleTextColor,
                                       fontSize: 15,
                                     ),
                                   ),
@@ -309,10 +366,24 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                   Text(
                                     mensaje.horaFormateada,
                                     style: TextStyle(
-                                      color: esMio ? Colors.white70 : Colors.black54,
+                                      color: esInapLocal
+                                          ? Colors.red.shade700
+                                          : (esMio ? Colors.white70 : Colors.black54),
                                       fontSize: 11,
                                     ),
                                   ),
+                                  if (esInapLocal)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Text(
+                                        'Mensaje inapropiado (solo tú lo ves)',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.red.shade700,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
