@@ -1,0 +1,6 @@
+# Lista básica de palabras prohibidas. Añade una por línea.
+# Ajusta a contexto local para reducir falsos positivos.
+# EJEMPLOS (solo ilustrativos; ampliar):
+idiota
+tonto
+# Agrega modismos locales aquí...

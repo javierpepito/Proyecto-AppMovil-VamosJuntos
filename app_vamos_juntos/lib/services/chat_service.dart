@@ -5,6 +5,7 @@ import '../main.dart';
 import '../models/chat_model.dart';
 import '../models/mensaje.model.dart';
 import '../models/salida_model.dart';
+import 'profanity_filter.dart';
 
 class ChatService {
   static final ChatService _instance = ChatService._internal();
@@ -298,6 +299,11 @@ class ChatService {
       final estaUnido = await estaEnChat(chatId, usuarioId);
       if (!estaUnido) {
         await unirseAChat(chatId, usuarioId);
+      }
+
+      // Validar contenido contra filtro de malas palabras
+      if (ProfanityFilter.instance.containsProfanity(contenido)) {
+        throw Exception('El mensaje contiene palabras inapropiadas');
       }
 
       final response = await supabase
