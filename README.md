@@ -76,12 +76,9 @@ flutter pub get
 ```
 
 ## Cosas pendientes de la APP
-- Validar entradas. [Cesar]
-- Control de malas palabras y/o bloqueo de usuarios. [Cesar]
 - confirmacion de correo electronico ya sea por supabase o por codigo.
 - pantalla de carga al principio.
 - recordar sesion.
-- al entrar al selector de chats, que no cargen todos.
 - Usar seguridad de supabase. 
 
 ## Cosas pendientes del informe
