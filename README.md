@@ -78,7 +78,6 @@ flutter pub get
 ## Cosas pendientes de la APP
 - Validar entradas. [Cesar]
 - Control de malas palabras y/o bloqueo de usuarios. [Cesar]
-- Optimizacion de cosas, indexando o paginando. [Cristian]
 - confirmacion de correo electronico ya sea por supabase o por codigo.
 - pantalla de carga al principio.
 - recordar sesion.
