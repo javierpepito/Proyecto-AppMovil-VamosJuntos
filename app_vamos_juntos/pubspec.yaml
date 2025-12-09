@@ -57,6 +57,7 @@ flutter:
     - assets/images/paradero4.png
     - assets/images/mapa.png
     - assets/images/hall_principal.png
+    - assets/data/profanity_es.txt
 
   # fonts:
   #   - family: Schyler
