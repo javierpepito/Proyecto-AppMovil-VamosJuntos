@@ -5,7 +5,9 @@ import '../widgets/barra_navegacion.dart';
 import 'espacio_chat_screen.dart';
 
 class ChatsListScreen extends StatefulWidget {
-  const ChatsListScreen({super.key});
+  final String? paraderoFiltro;
+
+  const ChatsListScreen({super.key, this.paraderoFiltro});
 
   @override
   State<ChatsListScreen> createState() => _ChatsListScreenState();
@@ -29,6 +31,10 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
   @override
   void initState() {
     super.initState();
+    // Si viene con un filtro desde el selector de paraderos, aplicarlo
+    if (widget.paraderoFiltro != null) {
+      _paraderoSeleccionado = widget.paraderoFiltro;
+    }
     _inicializarChats();
   }
 
@@ -99,7 +105,13 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
         backgroundColor: Colors.white,
         elevation: 1,
         centerTitle: false,
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
+        leading: _paraderoSeleccionado != null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
       ),
       body: Column(
         children: [
@@ -109,7 +121,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Selecciona tu paradero',
+                  'Filtrar por paradero',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -117,35 +129,79 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.blue.shade800),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: DropdownButton<String>(
-                    value: _paraderoSeleccionado,
-                    hint: const Text('Todos los paraderos'),
-                    isExpanded: true,
-                    underline: const SizedBox(),
-                    items: [
-                      const DropdownMenuItem(
-                        value: null,
-                        child: Text('Todos los paraderos'),
+                // Mostrar selector con chips para mejor UX
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      // Chip "Todos"
+                      FilterChip(
+                        label: const Text('Todos'),
+                        selected: _paraderoSeleccionado == null,
+                        onSelected: (selected) {
+                          setState(() => _paraderoSeleccionado = null);
+                          _cargarChats();
+                        },
+                        backgroundColor: Colors.grey[200],
+                        selectedColor: Colors.blue,
+                        labelStyle: TextStyle(
+                          color: _paraderoSeleccionado == null
+                              ? Colors.white
+                              : Colors.black87,
+                        ),
                       ),
+                      const SizedBox(width: 8),
+                      // Chips para cada paradero
                       ..._paraderos.map((paradero) {
-                        return DropdownMenuItem(
-                          value: paradero,
-                          child: Text(paradero),
+                        final isSelected = _paraderoSeleccionado == paradero;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            label: Text(paradero.split(' - ').last),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setState(
+                                  () => _paraderoSeleccionado = selected ? paradero : null);
+                              _cargarChats();
+                            },
+                            backgroundColor: Colors.grey[200],
+                            selectedColor: Colors.blue,
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black87,
+                            ),
+                          ),
                         );
                       }),
                     ],
-                    onChanged: (value) {
-                      setState(() => _paraderoSeleccionado = value);
-                      _cargarChats();
-                    },
                   ),
                 ),
+                if (!_isLoading && _chats.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.blue.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline, size: 18, color: Colors.blue),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${_chats.length} chat${_chats.length != 1 ? 's' : ''} disponible${_chats.length != 1 ? 's' : ''}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.blue,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -153,10 +209,39 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _chats.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'No hay chats disponibles',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.chat_bubble_outline,
+                                size: 64,
+                                color: Colors.grey.shade300,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                _paraderoSeleccionado != null
+                                    ? 'No hay chats disponibles en ${_paraderoSeleccionado!.split(' - ').last}'
+                                    : 'No hay chats disponibles en este momento',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Intenta más tarde',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       )
                     : RefreshIndicator(

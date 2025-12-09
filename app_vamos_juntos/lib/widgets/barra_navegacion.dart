@@ -3,7 +3,7 @@ import '../screens/home_screen.dart';
 import '../screens/perfil_screen.dart';
 import '../screens/info_paraderos_screen.dart';
 import '../screens/info_encuentro_screen.dart';
-import '../screens/lista_chats_screen.dart';
+import '../screens/selector_paraderos_screen.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -24,10 +24,9 @@ class CustomBottomNavBar extends StatelessWidget {
         );
         break;
       case 1:
-        // ⭐ ACTUALIZAR ESTA LÍNEA
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const ChatsListScreen()),
+          MaterialPageRoute(builder: (context) => const SelectorParaderosScreen()),
         );
         break;
       case 2:

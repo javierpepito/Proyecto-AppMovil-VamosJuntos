@@ -6,7 +6,7 @@ import '../models/salida_model.dart';
 import '../models/chat_model.dart';
 import '../main.dart'; 
 import 'login_screen.dart';
-import 'lista_chats_screen.dart';
+import 'selector_paraderos_screen.dart';
 import 'salida_detalle_screen.dart';
 import 'notificaciones_historial_screen.dart';
 import 'notificaciones_diagnostico_screen.dart';
@@ -22,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _authService = AuthService();
   final _notificationService = NotificationService();
+  final PageController _tipsController = PageController();
   
   String _userName = 'Usuario';
   bool _isLoading = true;
@@ -29,12 +30,26 @@ class _HomeScreenState extends State<HomeScreen> {
   ChatModel? _chatDeLaSalida;
   String? _currentUserId;
   int _notificacionesNoLeidas = 0;
+  int _tipsPage = 0;
+
+  final List<String> _tips = const [
+    'Antes de salir revisa tus rutas y comparte tu trayecto con un amigo.',
+    'Mantén tu teléfono con suficiente batería y lleva un cargador portátil.',
+    'Evita zonas poco iluminadas y usa rutas principales siempre que puedas.',
+    'Si notas algo sospechoso, busca un lugar concurrido y avisa a un conocido.',
+  ];
 
   @override
   void initState() {
     super.initState();
     _currentUserId = _authService.usuarioActual?.id;
     _cargarDatos();
+  }
+
+  @override
+  void dispose() {
+    _tipsController.dispose();
+    super.dispose();
   }
 
   Future<void> _cargarDatos() async {
@@ -151,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _irAChats() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ChatsListScreen()),
+      MaterialPageRoute(builder: (context) => const SelectorParaderosScreen()),
     ).then((_) => _cargarDatos()); // Recargar al volver
   }
 
@@ -299,9 +314,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     const SizedBox(height: 30),
 
-                    // Información importante
+                    // Accesos rápidos
                     const Text(
-                      'Información importante',
+                      'Accesos rápidos',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -310,62 +325,141 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Card informativa
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF00BCD4),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Column(
-                        children: [
-                          const Text(
-                            'Para poder unirte a una salida grupal debes entrar a un chat',
-                            style: TextStyle(color: Colors.white, fontSize: 15),
-                            textAlign: TextAlign.center,
+                    // Tarjeta de acceso rápido a chats
+                    InkWell(
+                      onTap: _irAChats,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF00BCD4), Color(0xFF0083B0)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                          const SizedBox(height: 15),
-                          ElevatedButton(
-                            onPressed: _irAChats,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF4081),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 12,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.teal.withOpacity(0.25),
+                              blurRadius: 10,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.15),
+                                shape: BoxShape.circle,
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                              child: const Icon(Icons.chat, color: Colors.white, size: 32),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  Text(
+                                    'Ir a Chats',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 6),
+                                  Text(
+                                    'Ingresa rápido y elige tu paradero para ver los chats disponibles.',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            child: const Text(
-                              'Ir a Chats',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
+                            const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 18),
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 15),
 
-                    // Consejo de seguridad
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF4081),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: const Text(
-                        'Consejo de seguridad: Antes de salir revisa tus rutas',
-                        style: TextStyle(color: Colors.white, fontSize: 15),
-                        textAlign: TextAlign.center,
+                    const SizedBox(height: 25),
+
+                    // Consejos en carrusel
+                    const Text(
+                      'Consejos de seguridad',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 150,
+                      child: PageView.builder(
+                        controller: _tipsController,
+                        itemCount: _tips.length,
+                        onPageChanged: (i) => setState(() => _tipsPage = i),
+                        itemBuilder: (context, index) {
+                          final tip = _tips[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF3E0),
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(color: const Color(0xFFFFB74D)),
+                              ),
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFB74D).withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.lightbulb_outline, color: Color(0xFFFF9800), size: 28),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      tip,
+                                      style: const TextStyle(
+                                        color: Color(0xFF664D00),
+                                        fontSize: 14,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(_tips.length, (i) {
+                        final selected = i == _tipsPage;
+                        return Container(
+                          width: selected ? 16 : 8,
+                          height: 8,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            color: selected ? const Color(0xFFFF9800) : Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        );
+                      }),
+                    ),
+
                     const SizedBox(height: 20),
 
                     // Versión
@@ -461,7 +555,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
+                color: Colors.white.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -527,7 +621,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
