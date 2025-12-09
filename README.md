@@ -108,3 +108,4 @@ flutter pub get
 Pero que exista el correo
 Como hacer un apk con flutter
 se puede hacer una pantalla reutilizable
+icono de la app
