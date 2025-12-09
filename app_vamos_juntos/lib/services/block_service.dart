@@ -21,10 +21,19 @@ class BlockService {
 
   Future<void> blockUser({required int blockedUsuarioId}) async {
     final myId = await _myUsuarioId();
-    await _sb.from('usuarios_bloqueados').insert({
-      'usuario_fk': myId,
-      'bloqueado_fk': blockedUsuarioId,
-    }, defaultToNull: true);
+    try {
+      await _sb.from('usuarios_bloqueados').insert({
+        'usuario_fk': myId,
+        'bloqueado_fk': blockedUsuarioId,
+      }, defaultToNull: true);
+    } on PostgrestException catch (e) {
+      // Si el código de error es 23505 (unique constraint violation), el usuario ya está bloqueado
+      if (e.code == '23505') {
+        // Ignorar, el usuario ya está bloqueado
+        return;
+      }
+      rethrow;
+    }
   }
 
   Future<void> unblockUser({required int blockedUsuarioId}) async {

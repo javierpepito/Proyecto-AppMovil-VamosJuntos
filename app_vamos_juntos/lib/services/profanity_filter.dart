@@ -19,7 +19,9 @@ class ProfanityFilter {
   }
 
   bool containsProfanity(String text) {
-    if (!_loaded) return false;
+    if (!_loaded) {
+      throw Exception('Filtro de profanidad no cargado. Llamar ProfanityFilter.instance.load() primero.');
+    }
     final normalized = text.toLowerCase();
     for (final w in _words) {
       if (normalized.contains(w)) return true;
@@ -28,7 +30,9 @@ class ProfanityFilter {
   }
 
   String censor(String text) {
-    if (!_loaded) return text;
+    if (!_loaded) {
+      throw Exception('Filtro de profanidad no cargado. Llamar ProfanityFilter.instance.load() primero.');
+    }
     var output = text;
     for (final w in _words) {
       final re = RegExp(RegExp.escape(w), caseSensitive: false);

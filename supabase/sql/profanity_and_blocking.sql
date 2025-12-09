@@ -40,17 +40,20 @@ begin
 end;
 $$;
 
--- 5) Trigger AFTER INSERT en mensajes: log y borrado si hay malas palabras
+-- 5) Trigger AFTER INSERT en mensajes: log y bloqueo si hay malas palabras
 create or replace function public.trg_mensajes_profanity()
 returns trigger
 language plpgsql
 as $$
 begin
   if public.contains_profanity(new.contenido) then
+    -- Registrar en log de moderación
     insert into public.mensajes_moderacion(mensaje_id, chat_fk, usuario_fk, contenido, motivo)
     values (new.id, new.chat_id, new.usuario_id, new.contenido, 'profanity');
-    delete from public.mensajes where id = new.id;
-    return null;
+    
+    -- Prevenir la inserción lanzando una excepción
+    raise exception 'Mensaje contiene palabras inapropiadas y fue bloqueado por el sistema de moderación'
+      using hint = 'El mensaje ha sido registrado en el log de moderación';
   end if;
   return new;
 end;
@@ -58,7 +61,7 @@ $$;
 
 drop trigger if exists tr_mensajes_profanity on public.mensajes;
 create trigger tr_mensajes_profanity
-after insert on public.mensajes
+before insert on public.mensajes
 for each row execute function public.trg_mensajes_profanity();
 
 -- 6) Habilitar RLS
