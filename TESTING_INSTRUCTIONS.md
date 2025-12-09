@@ -140,16 +140,18 @@ Future<void> main() async {
 
 Si un mensaje con malas palabras logra llegar a la base de datos (evadiendo la validación del cliente):
 
-1. El trigger `tr_mensajes_profanity` lo detectará
+1. El trigger `tr_mensajes_profanity` lo detectará ANTES de insertar
 2. Insertará un registro en `mensajes_moderacion` con el contenido
-3. Eliminará el mensaje de la tabla `mensajes`
-4. El mensaje NO aparecerá en el chat
+3. Lanzará una excepción para prevenir la inserción del mensaje
+4. El mensaje NO aparecerá en el chat y la app recibirá un error
 
 **Verificar logs de moderación**:
 
 ```sql
 SELECT * FROM public.mensajes_moderacion ORDER BY created_at DESC;
 ```
+
+**Nota**: Con el trigger BEFORE, el mensaje_id en `mensajes_moderacion` será el ID que se hubiera asignado, pero el mensaje nunca se insertará en la tabla `mensajes`.
 
 ### Paso 5: Pruebas de Bloqueo de Usuarios
 
@@ -280,8 +282,10 @@ DROP TABLE IF EXISTS public.usuarios_bloqueados;
 
 - Este PR es un **DRAFT** y no afecta la rama `main` hasta que sea aprobado
 - Los cambios en Flutter son **compatibles hacia atrás**: Si no se ejecuta el SQL, la app sigue funcionando (sin las políticas RLS)
+- **IMPORTANTE**: Antes de usar el filtro de profanidad, debe cargarse en el inicio de la app con `await ProfanityFilter.instance.load()`. Si no se carga, las funciones lanzarán una excepción para prevenir bypass de moderación.
 - Se recomienda probar primero en un proyecto de Supabase de desarrollo/staging antes de aplicar a producción
 - El script SQL usa `CREATE IF NOT EXISTS` para ser idempotente (se puede ejecutar varias veces sin errores)
+- El trigger SQL ahora usa `BEFORE INSERT` y `RAISE EXCEPTION` en lugar de eliminar mensajes después de insertarlos, lo que es más seguro y eficiente
 
 ## ✅ Checklist de Deployment
 
