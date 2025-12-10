@@ -8,7 +8,6 @@ import '../main.dart';
 import 'selector_paraderos_screen.dart';
 import 'salida_detalle_screen.dart';
 import 'notificaciones_historial_screen.dart';
-import 'notificaciones_diagnostico_screen.dart';
 import '../widgets/barra_navegacion.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -282,15 +281,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ).then((_) => _cargarDatos()); // Recargar al volver para actualizar badge
   }
 
-  void _irADiagnosticoNotificaciones() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const NotificacionesDiagnosticoScreen(),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -305,8 +295,6 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 icon: const Icon(Icons.notifications_outlined, color: Colors.black),
                 onPressed: _irANotificaciones,
-                onLongPress: _irADiagnosticoNotificaciones,
-                tooltip: 'Mantén presionado para diagnóstico',
               ),
               if (_notificacionesNoLeidas > 0)
                 Positioned(
