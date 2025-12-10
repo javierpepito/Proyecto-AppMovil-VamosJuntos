@@ -156,7 +156,6 @@ class FCMService {
     debugPrint('═══════════════════════════════════════════════');
     debugPrint('');
 
-    // TODO: Navegar a pantalla específica según los datos
     // Por ejemplo:
     // if (message.data['salida_id'] != null) {
     //   Navigator.push(...SalidaDetalleScreen...)

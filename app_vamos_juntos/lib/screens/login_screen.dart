@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import '../services/background_notification_service.dart';
 import '../services/fcm_service.dart';
 import 'register_screen.dart';
 import '../utils/validators.dart';
@@ -54,13 +53,9 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text,
       );
 
-      // Guardar user ID y registrar tarea de background
+      // Actualizar token FCM en Supabase
       final userId = supabase.auth.currentUser?.id;
       if (userId != null) {
-        await BackgroundNotificationService.guardarUserId(userId);
-        await BackgroundNotificationService.registrarTareaPeriodica();
-        
-        // Actualizar token FCM en Supabase
         await FCMService().actualizarTokenAlLogin(userId);
       }
 

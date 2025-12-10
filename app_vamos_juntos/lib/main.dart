@@ -7,7 +7,6 @@ import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/chat_service.dart';
 import 'services/notification_service.dart';
-import 'services/background_notification_service.dart';
 import 'services/fcm_service.dart';
 
 void main() async {
@@ -27,13 +26,10 @@ void main() async {
   // Inicializar sistema de chats
   await ChatService().inicializarSistema();
   
-  // Inicializar servicio de notificaciones
+  // Inicializar servicio de notificaciones locales
   await NotificationService().initialize();
   
-  // Inicializar WorkManager (funciona con app CERRADA)
-  await BackgroundNotificationService.initialize();
-  
-  // Inicializar FCM (Firebase Cloud Messaging)
+  // Inicializar FCM (Firebase Cloud Messaging) - Notificaciones con app cerrada
   await FCMService().initialize();
   
   runApp(const MyApp());
@@ -74,12 +70,11 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 
   Future<void> _verificarSesion() async {
-    // Si hay sesión activa, registrar WorkManager
+    // Si hay sesión activa, actualizar token FCM
     final session = supabase.auth.currentSession;
     if (session != null) {
       final userId = session.user.id;
-      await BackgroundNotificationService.guardarUserId(userId);
-      await BackgroundNotificationService.registrarTareaPeriodica();
+      await FCMService().actualizarTokenAlLogin(userId);
     }
   }
 
