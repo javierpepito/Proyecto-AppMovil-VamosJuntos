@@ -60,17 +60,36 @@ class NotificationService {
           AndroidFlutterLocalNotificationsPlugin>();
       
       if (androidPlugin != null) {
+        // Eliminar canal antiguo si existe y recrearlo
+        try {
+          await androidPlugin.deleteNotificationChannel('salidas_channel');
+          debugPrint('🗑️ Canal antiguo eliminado');
+        } catch (e) {
+          debugPrint('ℹ️ No había canal antiguo para eliminar');
+        }
+        
+        // Crear canal con configuración MÁXIMA
         await androidPlugin.createNotificationChannel(
           const AndroidNotificationChannel(
-            'salidas_channel', // DEBE coincidir con el ID usado en AndroidNotificationDetails
+            'salidas_channel',
             'Notificaciones de Salidas',
             description: 'Notificaciones sobre tus próximas salidas grupales',
-            importance: Importance.high,
+            importance: Importance.max, // MÁXIMA importancia
             playSound: true,
             enableVibration: true,
+            enableLights: true,
+            showBadge: true,
           ),
         );
-        debugPrint('✅ Canal de notificaciones creado: salidas_channel');
+        debugPrint('✅ Canal de notificaciones creado: salidas_channel (Importance.max)');
+        
+        // Verificar que el canal se creó
+        final channels = await androidPlugin.getNotificationChannels();
+        if (channels != null) {
+          for (var channel in channels) {
+            debugPrint('   Canal disponible: ${channel.id} - ${channel.name}');
+          }
+        }
       }
     }
 
@@ -221,10 +240,13 @@ class NotificationService {
       'salidas_channel',
       'Notificaciones de Salidas',
       channelDescription: 'Notificaciones sobre tus próximas salidas grupales',
-      importance: Importance.high,
-      priority: Priority.high,
+      importance: Importance.max, // MÁXIMA importancia
+      priority: Priority.max, // MÁXIMA prioridad
       playSound: true,
       enableVibration: true,
+      enableLights: true,
+      showWhen: true,
+      ticker: 'Notificación de Salida', // Ayuda en accesibilidad
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -238,33 +260,57 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    await _notifications.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduledDate,
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
-
-    final ahoraLocal = DateTime.now();
-    final diferencia = scheduledDate.difference(ahoraLocal);
+    // Verificar que la hora sea futura
+    final ahora = tz.TZDateTime.now(tz.local);
+    final diferencia = scheduledDate.difference(ahora);
     
-    debugPrint('📢 Notificación programada:');
+    debugPrint('📢 ========== PROGRAMANDO NOTIFICACIÓN ==========');
     debugPrint('   ID: $id');
     debugPrint('   Título: $title');
-    debugPrint('   Hora programada (TZ): $scheduledDate');
-    debugPrint('   Hora actual (Local): $ahoraLocal');
-    debugPrint('   Diferencia: ${diferencia.inSeconds} segundos (${diferencia.inMinutes} minutos)');
+    debugPrint('   Cuerpo: $body');
+    debugPrint('   Hora AHORA (TZ): $ahora');
+    debugPrint('   Hora PROGRAMADA (TZ): $scheduledDate');
+    debugPrint('   Diferencia: ${diferencia.inSeconds}s (${diferencia.inMinutes}m)');
+    debugPrint('   ¿Es futuro?: ${scheduledDate.isAfter(ahora)}');
+    debugPrint('   Modo: AndroidScheduleMode.exactAllowWhileIdle');
     
-    if (diferencia.isNegative) {
-      debugPrint('⚠️ ADVERTENCIA: La hora programada ya pasó! No se mostrará.');
-      return; // No programar si ya pasó
-    } else {
-      debugPrint('✅ Se mostrará en ${diferencia.inSeconds} segundos');
+    if (scheduledDate.isBefore(ahora) || scheduledDate.isAtSameMomentAs(ahora)) {
+      debugPrint('❌ ERROR: La hora programada ya pasó o es ahora mismo');
+      debugPrint('   No se programará la notificación');
+      return;
     }
+
+    try {
+      await _notifications.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduledDate,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+      
+      debugPrint('✅ zonedSchedule() ejecutado SIN ERRORES');
+      debugPrint('   La notificación debería aparecer en ${diferencia.inSeconds} segundos');
+      
+      // Verificar que se programó
+      final pendingNotifications = await _notifications.pendingNotificationRequests();
+      final programada = pendingNotifications.any((n) => n.id == id);
+      debugPrint('   ¿Está en pendientes?: ${programada ? "SÍ ✅" : "NO ❌"}');
+      debugPrint('   Total pendientes: ${pendingNotifications.length}');
+      
+      if (programada) {
+        debugPrint('   🎯 NOTIFICACIÓN CONFIRMADA EN COLA');
+      } else {
+        debugPrint('   ⚠️ ADVERTENCIA: No aparece en pendientes');
+      }
+    } catch (e, stack) {
+      debugPrint('❌ ERROR al llamar zonedSchedule(): $e');
+      debugPrint('Stack: $stack');
+    }
+    debugPrint('================================================');
 
     // Guardar en historial (esto es para que el usuario vea que se programó)
     // Nota: Esto significa que aparecerá en el historial antes de que se dispare
@@ -345,6 +391,26 @@ class NotificationService {
     );
     
     debugPrint('✅ Notificación INMEDIATA mostrada: $titulo');
+    
+    await _guardarEnHistorial(
+      titulo: titulo,
+      mensaje: mensaje,
+      fecha: DateTime.now(),
+      tipo: 'inmediata',
+    );
+  }
+
+  /// MÉTODO DE PRUEBA: Verificar notificaciones pendientes
+  Future<void> verNotificacionesPendientes() async {
+    final pending = await _notifications.pendingNotificationRequests();
+    debugPrint('📋 ========== NOTIFICACIONES PENDIENTES ==========');
+    debugPrint('   Total: ${pending.length}');
+    for (var p in pending) {
+      debugPrint('   - ID: ${p.id}');
+      debugPrint('     Título: ${p.title}');
+      debugPrint('     Cuerpo: ${p.body}');
+    }
+    debugPrint('==================================================');
   }
 
   /// Generar ID único para notificaciones basado en salidaId y tipo

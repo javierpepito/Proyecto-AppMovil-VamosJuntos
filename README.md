@@ -78,24 +78,8 @@ flutter pub get
 ## Cosas pendientes de la APP
 - confirmacion de correo electronico ya sea por supabase o por codigo.
 - pantalla de carga al principio.
-- recordar sesion.
 - Usar seguridad de supabase. 
-
-## Cosas pendientes del informe
-- Diseño del plan de pruebas (tipos, casos, criterios de aceptación, herramientas).
-- Realización de pruebas funcionales, de seguridad y rendimiento sobre el prototipo. Con capturas de pantallas, reportes y resultados.
-- Informe con los errores detectados, su clasificación, priorización y acciones correctivas.
-- Versión final funcional y segura del prototipo.
-- Diagramas de estructura, comportamiento e interacción actualizados. Diagramas UML (clases, secuencia, casos de uso, actividad).
-- Bitácora de trabajo SCRUM (sprints, backlog)
-
-- PRESENTACION FINAL 
 - A tomar en cuenta: (Mencionar practicas OWASP, Demostrar la correccion del codigo)
-
-## Cosas a mejorar y a agregar
-- Crear chats para cada salida.
-- Agregar funcionalidad de foto de perfil en los datos.
-- contador de personas en linea.
 
 ## Iconos de la Aplicación
 El icono de la aplicación se genera automáticamente desde `assets/images/logo.png` usando `flutter_launcher_icons`.

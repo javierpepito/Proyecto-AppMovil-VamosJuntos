@@ -204,29 +204,95 @@ ${!alarmasExactas ? '\n❌ ¡PROBLEMA ENCONTRADO!\nLas alarmas exactas están DE
             const Divider(),
             const SizedBox(height: 16),
             
-            // Botón: Abrir configuración
+            // Botón: Abrir configuración de la app
             ElevatedButton.icon(
               onPressed: () async {
+                final messenger = ScaffoldMessenger.of(context);
                 await _notificationService.abrirConfiguracionAlarmas();
                 
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Ve a "Alarmas y recordatorios" y HABILÍTALO'),
-                      backgroundColor: Colors.orange,
-                      duration: Duration(seconds: 5),
-                    ),
-                  );
-                }
+                if (!mounted) return;
                 
-                // Esperar un poco y volver a verificar
-                await Future.delayed(const Duration(seconds: 2));
-                _verificarEstado();
+                messenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('Verifica: 1) Notificaciones, 2) Alarmas, 3) Batería (sin restricciones)'),
+                    backgroundColor: Colors.orange,
+                    duration: Duration(seconds: 6),
+                  ),
+                );
               },
-              icon: const Icon(Icons.settings),
-              label: const Text('Abrir Configuración de Alarmas'),
+              icon: const Icon(Icons.settings_applications),
+              label: const Text('⚙️ Abrir Configuración de la App'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.all(16),
+                minimumSize: const Size(double.infinity, 50),
+              ),
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // Botón anterior de alarmas
+            OutlinedButton.icon(
+              onPressed: () async {
+                await _notificationService.abrirConfiguracionAlarmas();
+              },
+              icon: const Icon(Icons.alarm),
+              label: const Text('Configuración de Alarmas'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.orange,
+                padding: const EdgeInsets.all(16),
+              ),
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // Botón: Ver notificaciones pendientes
+            ElevatedButton.icon(
+              onPressed: () async {
+                final messenger = ScaffoldMessenger.of(context);
+                await _notificationService.verNotificacionesPendientes();
+                
+                if (!mounted) return;
+                
+                messenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('📋 Revisa los logs en la consola'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.list),
+              label: const Text('Ver Pendientes (en logs)'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.all(16),
+              ),
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // Botón: Cancelar todas las pendientes
+            ElevatedButton.icon(
+              onPressed: () async {
+                final messenger = ScaffoldMessenger.of(context);
+                await _notificationService.cancelarTodasLasNotificaciones();
+                
+                if (!mounted) return;
+                
+                messenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('🗑️ Todas las notificaciones pendientes canceladas'),
+                    backgroundColor: Colors.red,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.delete_sweep),
+              label: const Text('Cancelar Todas las Pendientes'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[700],
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.all(16),
               ),
@@ -290,36 +356,53 @@ ${!alarmasExactas ? '\n❌ ¡PROBLEMA ENCONTRADO!\nLas alarmas exactas están DE
             
             const SizedBox(height: 24),
             
-            // Información
+            // Información - DIAGNÓSTICO COMPLETO
             Card(
-              color: Colors.blue[50],
+              color: Colors.orange[50],
               child: const Padding(
                 padding: EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '📋 Problema Identificado:',
+                      '🔍 DIAGNÓSTICO: Notificaciones se programan pero NO aparecen',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red),
                     ),
                     SizedBox(height: 12),
                     Text(
-                      '❌ Las notificaciones programadas NO funcionan porque las ALARMAS EXACTAS están deshabilitadas.',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      '✅ El código funciona (aparecen en pendientes)',
+                      style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '❌ Android las bloquea al momento de dispararlas',
+                      style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 12),
-                    Text('🔧 SOLUCIÓN PASO A PASO:',
+                    Text('🔧 VERIFICA ESTAS CONFIGURACIONES:',
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     SizedBox(height: 8),
-                    Text('1. Presiona "Abrir Configuración de Alarmas" (botón NARANJA arriba)'),
-                    Text('2. Busca la opción "Alarmas y recordatorios" o "Alarms & reminders"'),
-                    Text('3. ACTÍVALO (cambia el switch a ON)'),
-                    Text('4. Vuelve a la app'),
-                    Text('5. Prueba nuevamente con "Notificación Programada (5 seg)"'),
+                    Text('1️⃣ AHORRO DE BATERÍA:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('   Configuración → Batería → app_vamos_juntos'),
+                    Text('   Debe estar en "Sin restricciones" o "No optimizar"'),
+                    SizedBox(height: 8),
+                    Text('2️⃣ NOTIFICACIONES:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('   Configuración → Apps → app_vamos_juntos → Notificaciones'),
+                    Text('   Asegúrate que TODO esté HABILITADO'),
+                    SizedBox(height: 8),
+                    Text('3️⃣ ALARMAS EXACTAS:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('   Configuración → Apps → app_vamos_juntos'),
+                    Text('   "Alarmas y recordatorios" debe estar HABILITADO'),
+                    SizedBox(height: 8),
+                    Text('4️⃣ MODO NO MOLESTAR:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('   Verifica que NO esté activado'),
                     SizedBox(height: 12),
                     Text(
-                      '📱 NOTA: Este permiso es obligatorio desde Android 12+ para notificaciones programadas con hora exacta.',
-                      style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+                      '⚠️ El problema más común es el AHORRO DE BATERÍA',
+                      style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.red),
                     ),
                   ],
                 ),
