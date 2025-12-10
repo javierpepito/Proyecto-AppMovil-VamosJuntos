@@ -5,7 +5,6 @@ import '../services/notification_service.dart';
 import '../models/salida_model.dart';
 import '../models/chat_model.dart';
 import '../main.dart'; 
-import 'login_screen.dart';
 import 'selector_paraderos_screen.dart';
 import 'salida_detalle_screen.dart';
 import 'notificaciones_historial_screen.dart';
@@ -248,12 +247,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (confirmar == true && mounted) {
       await _authService.cerrarSesion();
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
-      }
+      // El AuthWrapper en main.dart detectará el cierre de sesión
+      // y navegará automáticamente a LoginScreen
     }
   }
 

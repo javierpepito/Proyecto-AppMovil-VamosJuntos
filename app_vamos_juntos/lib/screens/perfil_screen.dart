@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../widgets/barra_navegacion.dart';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
-import 'login_screen.dart';
 
 class PerfilPage extends StatefulWidget {
   const PerfilPage({super.key});
@@ -395,12 +394,8 @@ class _PerfilPageState extends State<PerfilPage> {
     if (confirmar == true && mounted) {
       try {
         await _authService.cerrarSesion();
-        if (mounted) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-            (route) => false,
-          );
-        }
+        // El AuthWrapper en main.dart detectará el cierre de sesión
+        // y navegará automáticamente a LoginScreen
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/background_notification_service.dart';
+import '../services/fcm_service.dart';
 import 'register_screen.dart';
-import 'home_screen.dart';
 import '../utils/validators.dart';
 import '../main.dart';
 
@@ -59,14 +59,14 @@ class _LoginScreenState extends State<LoginScreen> {
       if (userId != null) {
         await BackgroundNotificationService.guardarUserId(userId);
         await BackgroundNotificationService.registrarTareaPeriodica();
+        
+        // Actualizar token FCM en Supabase
+        await FCMService().actualizarTokenAlLogin(userId);
       }
 
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-      }
+      // El AuthWrapper en main.dart detectará el cambio de sesión
+      // y navegará automáticamente a HomeScreen
+      
     } catch (e) {
       if (mounted) {
         _mostrarError(e.toString().replaceAll('Exception: ', ''));
