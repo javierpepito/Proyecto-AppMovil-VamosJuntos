@@ -19,7 +19,7 @@ class NotificationService {
   static const String _historialKey = 'notificaciones_historial';
 
   /// Inicializar el servicio de notificaciones
-  Future<void> initialize() async {
+  Future<void> initialize({bool requestPermissions = true}) async {
     if (_initialized) return;
 
     // Inicializar timezone
@@ -93,8 +93,12 @@ class NotificationService {
       }
     }
 
-    // Solicitar permisos
-    await _requestPermissions();
+    // Solicitar permisos solo si se indica (NO en background)
+    if (requestPermissions) {
+      await _requestPermissions();
+    } else {
+      debugPrint('⏭️ Permisos omitidos (modo background)');
+    }
 
     _initialized = true;
     debugPrint('✅ NotificationService inicializado');
@@ -357,9 +361,11 @@ class NotificationService {
   Future<void> mostrarNotificacionInmediata({
     required String titulo,
     required String mensaje,
+    bool isBackground = false, // Nuevo parámetro
   }) async {
     if (!_initialized) {
-      await initialize();
+      // En background NO solicitar permisos
+      await initialize(requestPermissions: !isBackground);
     }
 
     const androidDetails = AndroidNotificationDetails(

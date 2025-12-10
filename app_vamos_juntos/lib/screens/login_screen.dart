@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/background_notification_service.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
 import '../utils/validators.dart';
+import '../main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -51,6 +53,13 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text,
         password: _passwordController.text,
       );
+
+      // Guardar user ID y registrar tarea de background
+      final userId = supabase.auth.currentUser?.id;
+      if (userId != null) {
+        await BackgroundNotificationService.guardarUserId(userId);
+        await BackgroundNotificationService.registrarTareaPeriodica();
+      }
 
       if (mounted) {
         Navigator.pushReplacement(

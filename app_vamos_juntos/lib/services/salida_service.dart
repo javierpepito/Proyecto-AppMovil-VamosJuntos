@@ -1,9 +1,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../models/salida_model.dart';
 import '../models/salida_participante_model.dart';
-import 'notification_service.dart';
 
 class SalidaService {
   static final SalidaService _instance = SalidaService._internal();
@@ -64,14 +64,9 @@ class SalidaService {
         'micro': micro,
       });
 
-      // Programar notificaciones para esta salida
-      await NotificationService().programarNotificacionesSalida(
-        salidaId: salidaId,
-        horaSalida: salida.horaSalida,
-        puntoEncuentro: salida.puntoEncuentro,
-      );
-
-      debugPrint('✅ Usuario unido a la salida');
+      // WorkManager se encargará de las notificaciones automáticamente
+      // No necesitamos programar notificaciones aquí
+      debugPrint('✅ Usuario unido a la salida (WorkManager manejará notificaciones)');
     } on PostgrestException catch (e) {
       if (e.code == '23505') {
         // Ya está unido, actualizar micro si se proporcionó
@@ -123,10 +118,12 @@ class SalidaService {
           .eq('salida_id', salidaId)
           .eq('usuario_id', usuarioId);
 
-      // Cancelar notificaciones de esta salida
-      await NotificationService().cancelarNotificacionesSalida(salidaId);
+      // Limpiar notificaciones guardadas en SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('notif_10_${usuarioId}_$salidaId');
+      await prefs.remove('notif_momento_${usuarioId}_$salidaId');
 
-      debugPrint('✅ Usuario salió de la salida');
+      debugPrint('✅ Usuario salió de la salida y notificaciones limpiadas');
     } catch (e) {
       throw Exception('Error al salir de la salida: $e');
     }

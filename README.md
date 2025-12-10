@@ -77,9 +77,6 @@ flutter pub get
 
 ## Cosas pendientes de la APP
 - confirmacion de correo electronico ya sea por supabase o por codigo.
-- pantalla de carga al principio.
-- Usar seguridad de supabase. 
-- A tomar en cuenta: (Mencionar practicas OWASP, Demostrar la correccion del codigo)
 
 ## Iconos de la Aplicación
 El icono de la aplicación se genera automáticamente desde `assets/images/logo.png` usando `flutter_launcher_icons`.
