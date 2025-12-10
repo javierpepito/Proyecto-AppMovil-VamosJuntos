@@ -274,30 +274,33 @@ class _NotificacionesHistorialScreenState extends State<NotificacionesHistorialS
                     ),
                     const SizedBox(height: 8),
                     
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          size: 14,
-                          color: Colors.grey[500],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${formatoFecha.format(notificacion.fecha)} • ${formatoHora.format(notificacion.fecha)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 14,
+                            color: Colors.grey[500],
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '• ${notificacion.tiempoTranscurrido}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
+                          const SizedBox(width: 4),
+                          Text(
+                            '${formatoFecha.format(notificacion.fecha)} • ${formatoHora.format(notificacion.fecha)}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          Text(
+                            '• ${notificacion.tiempoTranscurrido}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     
                     // Punto de encuentro si existe
