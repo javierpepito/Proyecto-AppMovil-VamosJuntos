@@ -61,14 +61,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (mounted) {
-        _mostrarExito('¡Cuenta creada exitosamente!');
-        await Future.delayed(const Duration(seconds: 1));
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
-        }
+        // Mostrar diálogo de confirmación de email
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: const Text('📧 Confirma tu correo'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '¡Cuenta creada exitosamente!',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Hemos enviado un correo de confirmación a:',
+                  style: TextStyle(color: Colors.grey[700]),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _emailController.text,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Por favor revisa tu bandeja de entrada y haz clic en el enlace de confirmación antes de iniciar sesión.',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Cerrar diálogo
+                  Navigator.pop(context); // Volver a login
+                },
+                child: const Text('Entendido'),
+              ),
+            ],
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {

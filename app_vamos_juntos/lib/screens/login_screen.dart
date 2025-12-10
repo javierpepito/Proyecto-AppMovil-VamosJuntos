@@ -53,10 +53,26 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text,
       );
 
-      // Actualizar token FCM en Supabase
-      final userId = supabase.auth.currentUser?.id;
-      if (userId != null) {
-        await FCMService().actualizarTokenAlLogin(userId);
+      // Verificar si el email está confirmado
+      final user = supabase.auth.currentUser;
+      if (user != null) {
+        final emailConfirmed = user.emailConfirmedAt != null;
+        
+        if (!emailConfirmed) {
+          // Cerrar sesión si no está confirmado
+          await supabase.auth.signOut();
+          
+          if (mounted) {
+            _mostrarAdvertencia(
+              '📧 Confirma tu correo',
+              'Por favor revisa tu correo electrónico y haz clic en el enlace de confirmación antes de iniciar sesión.'
+            );
+          }
+          return;
+        }
+
+        // Email confirmado - Actualizar token FCM
+        await FCMService().actualizarTokenAlLogin(user.id);
       }
 
       // El AuthWrapper en main.dart detectará el cambio de sesión
@@ -78,6 +94,22 @@ class _LoginScreenState extends State<LoginScreen> {
       SnackBar(
         content: Text(mensaje),
         backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _mostrarAdvertencia(String titulo, String mensaje) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(titulo),
+        content: Text(mensaje),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Entendido'),
+          ),
+        ],
       ),
     );
   }
